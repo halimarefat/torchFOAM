@@ -16,7 +16,16 @@ Please note that due to having no access to root on clusters you may have some w
 3. Unzip the downloaded file and set an environment variable TORCH_LIBRARIES to /path/to/libtorch 
 4. You are good to wmake the code!
 
-## Running on a Docker
+## Running on a container
+Before explaining how to use containers to run torchFOAM, I would like to explain a little bit about containers.
+
+### Containers vs VMs
+
+### Docker vs Singularity
+
+### Dockerfile step-by-step
+
+### Using a docker container on Compute Canada clusters (or others!)
 
 ## Acknowledgment
 Many thanks to Andre Weiner for his tutorials on this topic.
