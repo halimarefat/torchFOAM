@@ -34,5 +34,5 @@ RUN wget -q -O libtorch.zip https://download.pytorch.org/libtorch/cpu/libtorch-c
     unzip libtorch.zip -d opt/ && \
     rm *.zip
 
-## set libtorch enironment variable
+# set libtorch enironment variable
 ENV TORCH_LIBRARIES /opt/libtorch
