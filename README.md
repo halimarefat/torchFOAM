@@ -21,7 +21,7 @@ Before explaining how to use containers to run torchFOAM, I would like to explai
 
 ### Containers vs VMs
 
-### Docker vs Singularity
+### Docker vs Apptainer
 
 ### Dockerfile step-by-step
 
