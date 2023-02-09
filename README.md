@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="/logo_new.png" width="850" align="center">
+  <img src="/logo_new.png" width="550" align="center">
 </p>
 
 # torchFOAM
