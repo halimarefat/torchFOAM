@@ -1,0 +1,3 @@
+SOURCE += torchFOAM.C
+
+EXE = ./torchFOAM
