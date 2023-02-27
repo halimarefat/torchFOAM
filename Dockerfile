@@ -1,6 +1,5 @@
 FROM ubuntu:22.04
 
-# avoid time zone configuration by tzdata
 ARG DEBIAN_FRONTEND=noninteractive
 
 # install basic utilities
@@ -27,7 +26,6 @@ RUN sudo sh -c "wget -O - https://dl.openfoam.org/gpg.key > /etc/apt/trusted.gpg
     echo ". ${FOAM_PATH}/etc/bashrc" >> /etc/bash.bashrc && \
     sed -i "s/-std=c++11/-std=c++14/g" ${FOAM_PATH}/wmake/rules/linux64Gcc/c++ && \
     sed -i "s/-Wold-style-cast/-Wno-old-style-cast/g" ${FOAM_PATH}/wmake/rules/linux64Gcc/c++
-
 
 # download and extract the PyTorch C++ libraries (libtorch)
 RUN wget -q -O libtorch.zip https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.13.1%2Bcpu.zip && \

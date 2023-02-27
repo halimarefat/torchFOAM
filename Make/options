@@ -2,7 +2,7 @@ EXE_INC = \
     -I$(TORCH_LIBRARIES)/include \
     -I$(TORCH_LIBRARIES)/include/torch/csrc/api/include \
     -std=c++14
-
+    
 EXE_LIBS = \
     -Wl,-rpath,$(TORCH_LIBRARIES)/lib \
     -Wl,-rpath,$(TORCH_LIBRARIES)/lib/libtorch.so \
