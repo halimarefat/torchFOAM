@@ -50,9 +50,7 @@
 
 # 8 "<command-line>" 2
 # 1 "Make/options"
-EXE_INC = -I$(TORCH_LIBRARIES)/include -I$(TORCH_LIBRARIES)/include/torch/csrc/api/include -std=c++14
-
-
-
+EXE_INC = -I$(TORCH_LIBRARIES)/include -I$(TORCH_LIBRARIES)/include/torch/csrc/api/include -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude -I$(LIB_SRC)/TurbulenceModels/incompressible/lnInclude -I$(LIB_SRC)/transportModels -I$(LIB_SRC)/finiteVolume/lnInclude -I$(LIB_SRC)/meshTools/lnInclude -std=c++14
+# 10 "Make/options"
  
-EXE_LIBS = -Wl,-rpath,$(TORCH_LIBRARIES)/lib -Wl,-rpath,$(TORCH_LIBRARIES)/lib/libtorch.so -Wl,-rpath,$(TORCH_LIBRARIES)/lib/libc10.so -Wl,--no-as-needed,$(TORCH_LIBRARIES)/lib/libtorch_cpu.so -Wl,--as-needed $(TORCH_LIBRARIES)/lib/libc10.so -Wl,--no-as-needed,$(TORCH_LIBRARIES)/lib/libtorch.so
+EXE_LIBS = -lturbulenceModels -lincompressibleTurbulenceModels -lincompressibleTransportModels -lcompressibleTurbulenceModels -lcompressibleTransportModels -lfiniteVolume -lmeshTools -lOpenFOAM -Wl,-rpath,$(TORCH_LIBRARIES)/lib -Wl,-rpath,$(TORCH_LIBRARIES)/lib/libtorch.so -Wl,-rpath,$(TORCH_LIBRARIES)/lib/libc10.so -Wl,--no-as-needed,$(TORCH_LIBRARIES)/lib/libtorch_cpu.so -Wl,--as-needed $(TORCH_LIBRARIES)/lib/libc10.so -Wl,--no-as-needed,$(TORCH_LIBRARIES)/lib/libtorch.so

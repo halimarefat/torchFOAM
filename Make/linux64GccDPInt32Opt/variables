@@ -1,1 +1,1 @@
-EXE = torchFOAM
+EXE = ./torchFOAM
