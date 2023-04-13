@@ -1,10 +1,15 @@
-#include "LESModel.H"
-#include "LESfilter.H"
-#include "LESeddyViscosity.H"
-
 #include <torch/torch.h>
 #include <iostream>
 #include <memory>
+
+#include "IncompressibleTurbulenceModel.H"
+#include "incompressible/transportModel/transportModel.H"
+#include "addToRunTimeSelectionTable.H"
+#include "makeTurbulenceModel.H"
+
+#include "laminarModel.H"
+#include "RASModel.H"
+#include "LESModel.H"
 
 struct DCGANGeneratorImpl : torch::nn::Module 
 {
