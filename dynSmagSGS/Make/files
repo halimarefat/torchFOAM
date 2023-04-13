@@ -1,3 +1,3 @@
 maketurbulentTransportModels.C
 
-LIB = D_SMA
+LIB = dynSmagSGS
