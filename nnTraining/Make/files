@@ -1,0 +1,3 @@
+nnTraining.C
+
+EXE = ./nnTraining

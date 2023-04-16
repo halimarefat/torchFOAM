@@ -71,10 +71,12 @@ struct DCGANDiscriminatorImpl : torch::nn::Module
 
   torch::Tensor forward(torch::Tensor x) 
   {
+    std::cout << "1: " << x.dtype() << "\n";
     x = Lrelu1(batch_norm1(conv1(x)));
     x = Lrelu2(batch_norm2(conv2(x)));
     x = Lrelu3(batch_norm3(conv3(x)));
     x = torch::sigmoid(conv4(x));
+    std::cout << "2: " << x.dtype() << "\n";
     return x;
   }
 
@@ -97,7 +99,7 @@ int main()
   if (torch::cuda::is_available()) 
   {
     std::cout << "CUDA is available! Training on GPU." << std::endl;
-    device = torch::kCUDA;
+    //device = torch::kCUDA;
   }
 
   int kNoiseSize = 100;
@@ -143,6 +145,7 @@ int main()
     {
       discriminator->zero_grad();
       torch::Tensor real_images = batch.data.to(device);
+      std::cout << "0: " << real_images.dtype() << "\n";
       torch::Tensor real_labels = torch::empty(batch.data.size(0)).uniform_(0.8, 1.0).to(device);
       torch::Tensor real_output = discriminator->forward(real_images);
       torch::Tensor d_loss_real = torch::binary_cross_entropy(real_output, real_labels);
