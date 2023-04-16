@@ -8,14 +8,15 @@ struct Options
 {
   const std::string file_path = "/home/hmarefat/scratch/torchFOAM/datasetGen/dataset.npy";
   const int64_t in_s          = 9;
-  const int64_t hd_s          = 50;
+  const int64_t hd_s          = 256;
   const int64_t ot_s          = 1;
-  const int64_t numbOfEpochs  = 50;
-  const int64_t batchSize     = 128;
+  const int64_t numbOfEpochs  = 100;
+  const int64_t batchSize     = 524288 * 4;
   int64_t batches_per_epoch   = 0;
   torch::DeviceType device    = torch::kCPU;
   const bool printBatches     = false;
-  const bool shuffleDataset   = true;
+  const bool shuffleDataset   = false;
+  const bool debug            = true;
 };
 
 static Options options;
@@ -79,14 +80,15 @@ public:
 class simpleNNImpl : public torch::nn::Module 
 {
   torch::nn::Linear lin1, lin2, lin3, lin4, lin5, lin6;
+  
 public:
   simpleNNImpl(const int64_t in_size, const int64_t hid_size, const int64_t out_size)
-    : lin1(torch::nn::Linear(in_size , hid_size)),
-      lin2(torch::nn::Linear(hid_size, hid_size)),
-      lin3(torch::nn::Linear(hid_size, hid_size)),
-      lin4(torch::nn::Linear(hid_size, hid_size)),
-      lin5(torch::nn::Linear(hid_size, hid_size)),
-      lin6(torch::nn::Linear(hid_size, out_size)) 
+    : lin1(torch::nn::LinearOptions(in_size , hid_size)),
+      lin2(torch::nn::LinearOptions(hid_size, hid_size/2)),
+      lin3(torch::nn::LinearOptions(hid_size/2, hid_size/4)),
+      lin4(torch::nn::LinearOptions(hid_size/4, hid_size/8)),
+      lin5(torch::nn::LinearOptions(hid_size/8, hid_size/8)),
+      lin6(torch::nn::LinearOptions(hid_size/8, out_size)) 
   {
     register_module("linear1", lin1);
     register_module("linear2", lin2);
@@ -99,14 +101,18 @@ public:
   torch::Tensor forward(torch::Tensor& x) 
   {
     x = torch::relu(lin1->forward(x));
+    x = torch::dropout(x, 0.2, is_training());
     x = torch::relu(lin2->forward(x));
+    x = torch::dropout(x, 0.2, is_training());
     x = torch::relu(lin3->forward(x)); 
+    x = torch::dropout(x, 0.2, is_training());
     x = torch::relu(lin4->forward(x)); 
+    x = torch::dropout(x, 0.2, is_training());
     x = torch::relu(lin5->forward(x));  
-    x = torch::tanh(lin6->forward(x));
+    x = torch::dropout(x, 0.2, is_training());
+    x = lin6->forward(x);
     return x;
   }
-
 };
 TORCH_MODULE(simpleNN);
 
@@ -162,11 +168,16 @@ int main()
     int64_t batch_index = 0;
     for(torch::data::Example<>& batch : *data_loader)
     {
-      model->zero_grad();
+      //model->zero_grad();
       auto feat = batch.data.to(options.device).to(torch::kFloat32);
+      std::cout << feat[0] << "\n\n";
       auto labs = batch.target.to(options.device).to(torch::kFloat32);
+      std::cout << labs[0] << "\n\n";
       auto pred = model->forward(feat);
-      auto loss = torch::mse_loss(pred, labs);
+      std::cout << pred[0] << "\n\n";
+      auto loss = torch::nn::functional::mse_loss(pred, labs);
+
+      break;
 
       optimizer.zero_grad();
       loss.backward();
@@ -179,6 +190,7 @@ int main()
                   options.batches_per_epoch,
                   loss.item<float>());
     }
+    break;
   }
 
   return 0;
