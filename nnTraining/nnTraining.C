@@ -211,22 +211,14 @@ int main()
   printf("+-- model is loaded to the device and trainig is starting!\n");
 
   torch::optim::Adam optimizer(model->parameters(), torch::optim::AdamOptions(1e-3));
-  
-  std::ofstream MyFile("filename.txt");
-
-  // Write to the file
-  MyFile << "Files can be tricky, but it is fun enough!";
-
-  // Close the file
-  MyFile.close();
 
   std::ofstream logFile("./_train.log");
   assert(logFile.is_open());
-  logFile << "epoch\tLoss_train\tAcc_train\tLoss_val\tAcc_val\n";
+  logFile << "epoch\tLoss_train\tLoss_val\n";
 
   float best_loss = std::numeric_limits<float>::max();
 
-  for(int64_t epoch=0; epoch <= options.numbOfEpochs; epoch++)
+  for(int64_t epoch=1; epoch <= options.numbOfEpochs; epoch++)
   {
     int64_t batch_index = 0;
     float Loss_train= 0, Loss_val= 0;
@@ -240,14 +232,14 @@ int main()
       auto train_pred = model->forward(train_feat);
       auto train_loss = torch::nn::functional::mse_loss(train_pred, train_labs);
       assert(!std::isnan(train_loss.template item<float>()));
-      auto train_acc = train_pred.argmax(1).eq(train_labs).sum();
+      //auto train_acc = train_pred.argmax(1).eq(train_labs).sum();
 
       optimizer.zero_grad();
       train_loss.backward();
       optimizer.step();
 
       Loss_train += train_loss.template item<float>();
-      Acc_train  += train_acc.template item<float>();
+      //Acc_train  += train_acc.template item<float>();
       std::printf("\rTraing Batch: [%3ld/%3ld]", batch_index++, options.train_batches_per_epoch);
     }
 
@@ -260,23 +252,22 @@ int main()
       auto val_pred = model->forward(val_feat);
       auto val_loss = torch::nn::functional::mse_loss(val_pred, val_labs);
       assert(!std::isnan(val_loss.template item<float>()));
-      auto val_acc = val_pred.argmax(1).eq(val_labs).sum();
+      //auto val_acc = val_pred.argmax(1).eq(val_labs).sum();
       val_loss.backward(); 
 
       Loss_val += val_loss.template item<float>();
-      Acc_val  += val_acc.template item<float>();
+      //Acc_val  += val_acc.template item<float>();
       std::printf("\rVal Batch: [%3ld/%3ld]", batch_index++, options.val_batches_per_epoch);
     }
     
-    std::printf("\r                                >>>> Epoch: [%2ld/%2ld] --- train_loss: %.4f, train_acc: %.4f | val_loss: %.4f, val_acc: %.4f",
+    std::printf("\r                                >>>> Epoch: [%2ld/%2ld] --- train_loss: %.4f | val_loss: %.4f",
                 epoch,
                 options.numbOfEpochs,
                 Loss_train, 
-                Acc_train,
-                Loss_val, 
-                Acc_val); 
+                Loss_val); 
     
-    logFile << epoch << "\t" << Loss_train << "\t" << Acc_train << "\t" << Loss_val << "\t" << Acc_val << "\n";
+    logFile << epoch << "\t" << Loss_train << "\t" << Loss_val << "\n";
+    logFile.flush();
     if(Loss_val < best_loss)
     {
       torch::save(model, "./best_model.pt");
