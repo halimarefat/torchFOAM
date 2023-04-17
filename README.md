@@ -27,5 +27,3 @@ Before explaining how to use containers to run torchFOAM, I would like to explai
 
 ### Using a docker container on Compute Canada clusters (or others!)
 
-## Acknowledgment
-Many thanks to Andre Weiner for his tutorials on this topic.
