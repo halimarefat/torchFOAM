@@ -1,4 +1,12 @@
 $(OBJECTS_DIR)/nnTraining.C.dep: \
 nnTraining.C \
+config.H \
+utils.H \
+CustomDataset.H \
+model.H \
 
+config.H :
+utils.H :
+CustomDataset.H :
+model.H :
 
