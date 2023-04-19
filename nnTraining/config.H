@@ -21,4 +21,5 @@ struct Options
   const bool shuffleDataset   = true;
   const int64_t numOfShuffle  = 10;
   const bool debug            = true;
+  const bool loadBest         = true;
 };

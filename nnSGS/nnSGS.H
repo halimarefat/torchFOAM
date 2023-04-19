@@ -76,7 +76,6 @@ protected:
         LESfilter& filter_;
         volScalarField y_;
 
-
     // Protected Member Functions
 
         //- Update sub-grid eddy-viscosity

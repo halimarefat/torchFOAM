@@ -1,10 +1,10 @@
 $(OBJECTS_DIR)/maketurbulentTransportModels.C.dep: \
 maketurbulentTransportModels.C \
-DNNSGS.H \
+nnSGS.H \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/turbulentTransportModels.H \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/simpleFilter.H \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/LESeddyViscosity.H \
-DNNSGS.C \
+nnSGS.C \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/IncompressibleTurbulenceModel.H \
 $(WM_PROJECT_DIR)/src/transportModels/incompressible/transportModel/transportModel.H \
 $(WM_PROJECT_DIR)/src/OpenFOAM/lnInclude/addToRunTimeSelectionTable.H \
@@ -17,6 +17,8 @@ $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/eddyViscosity.
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/LESeddyViscosity.C \
 $(WM_PROJECT_DIR)/src/finiteVolume/lnInclude/fvOptions.H \
 $(WM_PROJECT_DIR)/src/finiteVolume/lnInclude/wallDist.H \
+model.H \
+CustomDataset.H \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/TurbulenceModel.H \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/incompressibleTurbulenceModel.H \
 $(WM_PROJECT_DIR)/src/finiteVolume/lnInclude/fvMatrix.H \
@@ -731,11 +733,11 @@ $(WM_PROJECT_DIR)/src/OpenFOAM/lnInclude/triangleI.H \
 $(WM_PROJECT_DIR)/src/OpenFOAM/lnInclude/Barycentric2D.H \
 $(WM_PROJECT_DIR)/src/OpenFOAM/lnInclude/Barycentric2DI.H \
 
-DNNSGS.H :
+nnSGS.H :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/turbulentTransportModels.H :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/simpleFilter.H :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/LESeddyViscosity.H :
-DNNSGS.C :
+nnSGS.C :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/IncompressibleTurbulenceModel.H :
 $(WM_PROJECT_DIR)/src/transportModels/incompressible/transportModel/transportModel.H :
 $(WM_PROJECT_DIR)/src/OpenFOAM/lnInclude/addToRunTimeSelectionTable.H :
@@ -748,6 +750,8 @@ $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/eddyViscosity.
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/LESeddyViscosity.C :
 $(WM_PROJECT_DIR)/src/finiteVolume/lnInclude/fvOptions.H :
 $(WM_PROJECT_DIR)/src/finiteVolume/lnInclude/wallDist.H :
+model.H :
+CustomDataset.H :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/TurbulenceModel.H :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/incompressibleTurbulenceModel.H :
 $(WM_PROJECT_DIR)/src/finiteVolume/lnInclude/fvMatrix.H :

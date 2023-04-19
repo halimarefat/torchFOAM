@@ -61,6 +61,10 @@ int main()
   }
  
   simpleNN model(options.in_s, options.hd_s, options.ot_s);
+  if(options.loadBest)
+  {
+    torch::load(model, "./best_model.pt");
+  }
   model->to(options.device);
   printf("+-- model is loaded to the device and trainig is starting!\n");
 
@@ -126,7 +130,7 @@ int main()
     logFile.flush();
     if(Loss_val < best_loss)
     {
-      torch::save(model, "./best_model.pt");
+      torch::save(model, "./best_model_new.pt");
       best_loss = Loss_val;
     }
   }

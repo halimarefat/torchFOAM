@@ -1,0 +1,97 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  3.0.x                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../meshSetup"
+
+application     awcm;
+
+startFrom       $startF; 
+
+startTime       $TBEG;
+
+stopAt          endTime;
+
+endTime         $TMAX;
+
+deltaT          $DT;
+
+writeControl    $wrC;
+
+writeInterval   $WI;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+adjustTimeStep   yes;
+
+maxCo            $maxCor;
+
+
+functions
+{
+    fieldAverage1
+    {
+        type            fieldAverage;
+        functionObjectLibs ( "libfieldFunctionObjects.so" );
+        enabled         true;
+        writeControl   outputTime;
+	    resetOnRestart  true;
+	
+        fields
+        (
+            U
+            {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+		        window      1000;
+            }
+
+        );
+    }
+    #includeFunc probes
+    #includeFunc probes_POD
+    //#includeFunc singleGraph1
+    //#includeFunc singleGraph2
+    //#includeFunc singleGraph3
+    //#includeFunc singleGraph4
+    //#includeFunc surfaces1
+    //#includeFunc surfaces2
+    //#includeFunc surfaces3
+    //#includeFunc surfaces4
+    //#includeFunc surfaces5
+    //#includeFunc wallShearStress
+    #include "forces";
+    #include "forceCoeffs";
+}
+
+libs ("/home/hmarefat/projects/def-alamj/hmarefat/PhD-OpenFOAM/applications/libs/libCanopyModel.so" 
+      "/home/hmarefat/projects/def-alamj/shared/libs/v6/libAtmosphericTurbulenceModels.so"
+      "/home/hmarefat/scratch/torchFOAM/nnSGS/nnSGS.so");
+
+// ************************************************************************* //

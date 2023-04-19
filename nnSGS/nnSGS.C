@@ -23,10 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include <torch/torch.h>
 #include "nnSGS.H"
 #include "fvOptions.H"
 #include "wallDist.H"
-
+#include "model.H"
+#include "CustomDataset.H"
+#include <vector>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -148,16 +151,22 @@ void nnSGS<BasicTurbulenceModel>::correct()
         return;
     }
 
-    LESeddyViscosity<BasicTurbulenceModel>::correct(); // For changing mesh - coming from turbulenceModel.C through virtual shit
+    LESeddyViscosity<BasicTurbulenceModel>::correct();
 
-    int in_channels = 9;
-    int out_channels = 1;
+    const int64_t in_s = 9;
+    const int64_t hd_s = 256;
+    const int64_t ot_s = 1;
+    torch::DeviceType device = torch::kCPU; //kCUDA;
+
+    simpleNN model(in_s, hd_s, ot_s);
+    torch::load(model, "../nnTraining/best_model_new.pt");
+
+    volScalarField u_ = this->U_.component(vector::X);
+    volScalarField v_ = this->U_.component(vector::Y);
+    volScalarField w_ = this->U_.component(vector::Z);
 
     tmp<volTensorField> tgradU(fvc::grad(this->U_));
     const volTensorField& gradU = tgradU();
-
-    int cellNum = this->mesh_.cells().size();
-
     volSymmTensorField S(dev(symm(gradU)));
     volScalarField S11 = S.component(tensor::XX);
     volScalarField S12 = S.component(tensor::XY);
@@ -166,53 +175,47 @@ void nnSGS<BasicTurbulenceModel>::correct()
     volScalarField S23 = S.component(tensor::YZ);
     volScalarField S33 = S.component(tensor::ZZ);
 
-
-    volScalarField u_ = this->U_.component(vector::X);
-    volScalarField v_ = this->U_.component(vector::Y);
-    volScalarField w_ = this->U_.component(vector::Z);
-
-    volScalarField filter_width(this->delta());
-
-    float input_vals[cellNum][in_channels];
-    //torch::List<torch::Tensor> input_vals;
-    const std::vector<std::int64_t> input_dims = {cellNum, in_channels};
-
-    forAll(S11.internalField(), id) 
+    std::vector<std::vector<double>> in_data;
+    forAll(u_, i)
     {
-        input_vals[id][0] = S11[id];
-        input_vals[id][1] = S12[id];
-        input_vals[id][2] = S13[id];    
-        input_vals[id][3] = S22[id];
-        input_vals[id][4] = S23[id];
-        input_vals[id][5] = S33[id];
-        input_vals[id][6] = u_[id];
-        input_vals[id][7] = v_[id];
-        input_vals[id][8] = w_[id];
+        std::vector<double> tmp;
+        tmp.push_back(u_[i]);
+        tmp.push_back(v_[i]);
+        tmp.push_back(w_[i]);
+        tmp.push_back(S11[i]);
+        tmp.push_back(S12[i]);
+        tmp.push_back(S13[i]);
+        tmp.push_back(S22[i]);
+        tmp.push_back(S23[i]);
+        tmp.push_back(S33[i]);
+
+        in_data.push_back(tmp);
+    }
+    //std::cout << u_[0] << v_[0] << w_[0] << S11[0] << S12[0] << S13[0] << S22[0] << S23[0] << S33[0] << std::endl;
+    //std::cout << "+--- in_data: " << in_data[0] << std::endl;
+    const int64_t batchSize = in_data.size();
+    Info << "+--- batch size: " << batchSize << nl;
+    auto feat_ds  = CustomDataset(in_data, in_s).map(torch::data::transforms::Stack<>());
+    auto dsloader = torch::data::make_data_loader<torch::data::samplers::SequentialSampler>
+                          ( std::move(feat_ds), batchSize);
+    Info << "+--- data loader is ready." << nl;
+
+    model->to(device);
+    Info << "+--- nn model is loaded to device." << nl;
+    for(torch::data::Example<>& batch : *dsloader)
+    {
+        auto feat = batch.data.to(device).to(torch::kFloat32);
+        //std::cout << "+--- feat: " << feat[0] << std::endl;
+        auto pred = model->forward(feat);
+        forAll(this->Cs_, i)
+        {
+            this->Cs_[i] = pred[i].item<float>();
+        }
     }
     
-
-    auto options = torch::TensorOptions()
-        .dtype(torch::kFloat32)
-        .requires_grad(true);
-
-    torch::jit::script::Module torch_module_;
-    torch_module_ = torch::jit::load("/DNNLES/outputs/model.pt"); 
-    torch::Tensor inputs = torch::from_blob(input_vals, {cellNum,in_channels}, options);
-
-    std::vector<torch::jit::IValue> input_tensor;    
-    input_tensor.push_back(inputs);
-
-    torch::Tensor pred_Cs_ = torch_module_.forward(input_tensor).toTensor();
-
-    for (int i = 0; i < cellNum; i++)
-    {
-        this->Cs_[i] = pred_Cs_[out_channels*i].item<float>();
-    }
-
     this->Cs_ = filter_(this->Cs_);
 
     correctNut(gradU);
-    
 }
 
 

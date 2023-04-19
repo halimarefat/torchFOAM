@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-count = 273
+count = 873
 f = open("_train.log", "r")
 f.readline()
 epochs = []
