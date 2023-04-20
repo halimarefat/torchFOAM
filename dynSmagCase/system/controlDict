@@ -54,6 +54,128 @@ maxCo            $maxCor;
 
 functions
 {
+    
+    postLESFunc
+    {
+        functionObjectLibs  ("libutilityFunctionObjects.so");
+        type                coded;
+        redirectType        postLESFunc;
+        writeControl        outputTime; //timeStep; //
+        enabled             true;
+
+        codeInclude
+        #{
+            #include "turbulentTransportModels.H"
+            #include "turbulentTransportModel.H"
+            #include "turbulenceModel.H"
+            #include "LESeddyViscosity.H"
+            #include "simpleFilter.H"
+            #include "LESfilter.H"
+            #include <chrono>
+            #include <vector>
+            #include <numeric>
+            #include <map>
+        #};
+        
+        codeOptions
+        #{
+            -I$(LIB_SRC)/meshTools/lnInclude \
+            -I$(FOAM_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
+            -I$(FOAM_SRC)/TurbulenceModels/incompressible/lnInclude \
+            -I$(FOAM_SRC)/transportModels \
+        #};
+
+        codeExecute
+        #{
+            const volVectorField& U = mesh().lookupObject<volVectorField>("U");
+            volTensorField gradU = fvc::grad(U);
+            volSymmTensorField S(symm(gradU));
+            const Foam::incompressible::turbulenceModel&  turbulence = mesh().thisDb().lookupObject<Foam::incompressible::turbulenceModel>("turbulenceProperties");            
+          
+            //const tmp<volScalarField> tmp_nu = turbulence.nu();
+            //const volScalarField& nu_sgs = tmp_nu;
+            //const tmp<volScalarField> tmp_k = turbulence.k();
+            //const volScalarField& k_sgs = tmp_k;
+            //const tmp<volScalarField> tmp_eps = turbulence.epsilon();
+            //const volScalarField& eps = tmp_eps;  
+                      
+            volScalarField enstr = 0.5*magSqr(fvc::curl(U));
+            volVectorField omega = fvc::curl(U);
+        
+            static autoPtr<volScalarField> skewns;
+            static autoPtr<volScalarField> vortSt;
+            static autoPtr<volScalarField> strain;
+          
+            if(!skewns.valid() && !vortSt.valid() && !strain.valid())
+            {
+                skewns.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "skewness",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        -1.0/3.0*(S && (S & S))
+                    )
+                );
+
+                vortSt.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "vortexStretching",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        omega & (omega & S)
+                    )
+                );
+
+                strain.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "strainSeflAmp",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        (S & S) && S
+                    )
+                );
+            }
+            volScalarField& skewness = skewns();
+            volScalarField& vortexStretching = vortSt();
+            volScalarField& strainSeflAmp = strain();
+        
+            if(mesh().time().writeTime())
+            {
+                //nu_sgs.write();
+                //k_sgs.write();
+                //eps.write();
+                skewness.checkIn();
+                skewness.write();
+                vortexStretching.checkIn();
+                vortexStretching.write();
+                strainSeflAmp.checkIn();
+                strainSeflAmp.write();
+            }
+        
+        #};
+    }
+    
     fieldAverage1
     {
         type            fieldAverage;

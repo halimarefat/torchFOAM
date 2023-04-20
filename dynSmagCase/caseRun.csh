@@ -12,3 +12,4 @@ blockMesh
 topoSet
 decomposePar
 srun /home/hmarefat/projects/def-alamj/shared/bin/v6/atmosphericLES -parallel > casec_log.out
+reconstructPar

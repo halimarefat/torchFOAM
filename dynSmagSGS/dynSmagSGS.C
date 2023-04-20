@@ -203,6 +203,10 @@ void dynSmagSGS<BasicTurbulenceModel>::correct()
 
     if(this->runTime_.outputTime())
     {
+        const char* k_name = "k_sgs";
+        k_.rename(k_name);
+        k_.write();
+
         const char* Cs_name = "Cs";
         Cs_.rename(Cs_name);
         Cs_.write();
