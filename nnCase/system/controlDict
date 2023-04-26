@@ -92,8 +92,8 @@ functions
             const Foam::incompressible::turbulenceModel&  turbulence = mesh().thisDb().lookupObject<Foam::incompressible::turbulenceModel>("turbulenceProperties");            
             const tmp<volScalarField> tmp_nu = turbulence.nu();
             const volScalarField& nu_sgs = tmp_nu;
-            const tmp<volScalarField> tmp_k = turbulence.k();
-            const volScalarField& k_sgs = tmp_k;
+            //const tmp<volScalarField> tmp_k = turbulence.k();
+            //const volScalarField& k_sgs = tmp_k;
             const tmp<volScalarField> tmp_eps = turbulence.epsilon();
             const volScalarField& eps = tmp_eps;            
             volScalarField enstr = 0.5*magSqr(fvc::curl(U));
@@ -159,7 +159,7 @@ functions
             if(mesh().time().writeTime())
             {
                 nu_sgs.write();
-                k_sgs.write();
+                //k_sgs.write();
                 eps.write();
                 skewness.checkIn();
                 skewness.write();
