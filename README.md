@@ -16,6 +16,8 @@ Please note that due to having no access to root on clusters you may have some w
 3. Unzip the downloaded file and set an environment variable TORCH_LIBRARIES to /path/to/libtorch 
 4. You are good to wmake the code!
 
+Happy Computing!
+
 
 
 
