@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.preprocessing import StandardScaler
 
 class OFv6:
     def __init__(self, path, tStart, tEnd, tStep):
@@ -7,6 +8,7 @@ class OFv6:
         self.tEnd = tEnd
         self.tStep = tStep
         self.dataset = []
+        self.scaled = True
 
     def reader(self, file):
         
@@ -28,8 +30,9 @@ class OFv6:
         Sij = self.reader(path + '/S_ij')
         U = self.reader(path + '/U')
         Cs = self.reader(path + '/Cs')
-
+        
         return np.concatenate((U,Sij,Cs),axis=1)
+
 
     def dataset_generator(self):
 
@@ -42,6 +45,13 @@ class OFv6:
                 self.dataset = np.concatenate((self.dataset,self.data_collector(path)),axis=0) 
             print('Time: ' + str(t) + ' is done')
             t = t + self.tStep        
+
+        if(self.scaled):
+            ds_scaler = StandardScaler()
+            ds_scaler.fit(self.dataset)
+            np.savetxt('./means.txt',ds_scaler.mean_)
+            np.savetxt('./scales.txt',ds_scaler.scale_)
+            self.dataset = ds_scaler.transform(self.dataset)   
 
         print('Dataset shape: ' + str(self.dataset.shape))
 

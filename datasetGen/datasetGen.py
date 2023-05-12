@@ -9,7 +9,7 @@ class datasetGen():
         self.cwd = cwd
         self.dirname = dirname
         self.of_data = self.dirname + '/' +caseFolder
-        self.ds_path = self.cwd + '/dataset.npy'
+        self.ds_path = self.cwd + '/dataset_scaled.npy'
 
     def __call__(self):
 

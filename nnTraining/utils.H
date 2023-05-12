@@ -72,5 +72,25 @@ std::pair<DatasetType, DatasetType> datasetCreator(Options& options)
     }
   }
 
+  std::ofstream train_fout("train.dat");
+  std::ofstream val_fout("val.dat");
+  for(auto r : train)
+  {
+    train_fout << r.first[0] << " " << r.first[1] << " " << r.first[2] << " " << r.first[3] << " " << r.first[4] 
+        << " " << r.first[5] << " " << r.first[6] << " " << r.first[7] << " " << r.first[8] << " " << r.second 
+        << "\n";
+
+  }
+  for(auto r : val)
+  {
+    val_fout << r.first[0] << " " << r.first[1] << " " << r.first[2] << " " << r.first[3] << " " << r.first[4] 
+        << " " << r.first[5] << " " << r.first[6] << " " << r.first[7] << " " << r.first[8] << " " << r.second 
+        << "\n";
+
+  }
+  
+  train_fout.close();
+  val_fout.close();
+
   return std::make_pair(train, val);
 }

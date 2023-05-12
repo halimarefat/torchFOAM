@@ -1,5 +1,5 @@
-$(OBJECTS_DIR)/nnTraining.C.dep: \
-nnTraining.C \
+$(OBJECTS_DIR)/nnTraining_mod.C.dep: \
+nnTraining_mod.C \
 config.H \
 utils.H \
 CustomDataset.H \
