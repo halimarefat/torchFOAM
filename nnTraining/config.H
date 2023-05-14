@@ -9,9 +9,9 @@ struct Options
   const int64_t hd_s          = 63; //256;
   const int64_t ot_s          = 1;
   const int64_t numbOfEpochs  = 600;
-  const int64_t batchSize     = 1028; //524288 / 256; // size of one time-step >> 524288;
+  const int64_t batchSize     = 524288; //1028; // size of one time-step >> 524288;
   int64_t dataset_size        = 0;
-  const float train_val_split = 0.2;
+  const float train_val_split = 0; //0.2;
   const float test_split      = 0.1;
   int64_t train_size          = 0;
   int64_t val_size            = 0;
@@ -22,5 +22,5 @@ struct Options
   const bool shuffleDataset   = true;
   const int64_t numOfShuffle  = 10;
   const bool debug            = true;
-  const bool loadBest         = false;
+  const bool trainMode        = false;
 };

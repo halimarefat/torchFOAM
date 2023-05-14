@@ -4,7 +4,7 @@ from datasetGen import datasetGen
 
 np.random.seed(10)
 
-ds = datasetGen(caseFolder='dynSmagCase') 
+ds = datasetGen(caseFolder='dynSmagCase', lowbnd=525, highbnd=600, bounded=True) 
 ds.__call__()
 
 """
