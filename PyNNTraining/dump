@@ -1,0 +1,15 @@
+model.train() 
+for epoch in range(epochs):
+    with tqdm(train_loader, unit="batch") as tepoch:
+        for data, target in tepoch:
+            tepoch.set_description(f"Epoch {epoch}")
+            
+            optimizer.zero_grad()
+            train_feat, train_labs = data.to(device), target.to(device)
+            train_pred = model.forward(train_feat)
+            train_loss += torch.nn.functional.mse_loss(train_pred, train_labs) / 1028
+            train_accy = (train_pred == train_labs).sum().item() / 1028
+            train_loss.backward()
+            optimizer.step()
+
+            tepoch.set_postfix(loss=train_loss.item(), accuracy=100. * train_accy)
