@@ -26,7 +26,7 @@ out_sz = 1
 hid_sz = 63
 lay_nm = 4
 device = torch.device("cuda")
-epochs = 500
+epochs = 600
 train_sz = int(train_val_split * len(data))
 val_sz = len(data) - train_sz
 
@@ -43,12 +43,12 @@ model.to(device)
 
 print('+-- model summary:')
 print(model)
-print('+-- dataset  shape: [', len(data)    , inp_sz+out_sz, ']')
-print('+-- train ds shape: [', len(train_ds), inp_sz+out_sz, ']')
-print('+-- val   ds shape: [', len(val_ds)  , inp_sz+out_sz, ']')
+print('+-- dataset  shape: [', len(data)    ,',', inp_sz+out_sz, ']')
+print('+-- train ds shape: [', len(train_ds),',', inp_sz+out_sz, ']')
+print('+-- val   ds shape: [', len(val_ds)  ,',', inp_sz+out_sz, ']')
 
-train_noBatch = len(train_ds) / batch_sz
-val_noBatch = len(val_ds) / batch_sz
+train_noBatch = int(len(train_ds) / batch_sz)
+val_noBatch = int(len(val_ds) / batch_sz)
 
 print('+-- train batchs #: ', train_noBatch)
 print('+-- val   batchs #: ', val_noBatch)
@@ -76,11 +76,12 @@ for epoch in range(epochs):
             tepoch.set_postfix(loss=Loss_train, accuracy=100. * train_accy)
 """
 
-Loss_train = 0 
-Loss_val = 0
+
 for epoch in range(epochs):
     model.train()
-    for batch, i in enumerate(train_loader):
+    Loss_train = 0 
+    Loss_val = 0
+    for i, batch in enumerate(train_loader):
         train_feat = batch["data"].to(device).to(torch.float32)
         train_labs = batch["target"].to(device).to(torch.float32)
         train_pred = model.forward(train_feat)
@@ -91,11 +92,11 @@ for epoch in range(epochs):
         optimizer.step()
 
         Loss_train += train_loss.item()
-        print(f"\r Training - batch: {i} / {train_noBatch}.")
     Loss_train /= batch_sz
 
     model.eval()
-    for batch, i in enumerate(val_loader):
+    batch_indx = 0
+    for batch in val_loader:
         val_feat = batch["data"].to(device).to(torch.float32)
         val_labs = batch["target"].to(device).to(torch.float32)
         val_pred = model.forward(val_feat)
@@ -106,6 +107,7 @@ for epoch in range(epochs):
         optimizer.step()
 
         Loss_val += val_loss.item()
-        print(f"\r Validation - batch: {i} / {val_noBatch}.")
-    print(f"\r Epoch: {epoch} / {epochs}, Train Loss: {Loss_train}, Val Loss: {Loss_val}.")
+        batch_indx += 1
+    Loss_val /= batch_sz
+    print(f"Epoch: {epoch} / {epochs}, Train Loss: {Loss_train}, Val Loss: {Loss_val}.")
 
