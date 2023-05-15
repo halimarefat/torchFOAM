@@ -17,7 +17,7 @@ class CustomDataset(torch.utils.data.Dataset):
         return sample
 
 
-data = CustomDataset('/home/hmarefat/scratch/torchFOAM/datasetGen/dataset_460_490.npy')
+data = CustomDataset('/home/hmarefat/scratch/torchFOAM/datasetGen/dataset_scaled.npy')
 
 train_val_split = 0.8
 batch_sz = 1028
@@ -26,7 +26,7 @@ out_sz = 1
 hid_sz = 63
 lay_nm = 4
 device = torch.device("cuda")
-epochs = 50
+epochs = 500
 train_sz = int(train_val_split * len(data))
 val_sz = len(data) - train_sz
 
@@ -43,9 +43,9 @@ model.to(device)
 
 print('+-- model summary:')
 print(model)
-print('+-- dataset  shape: [', len(data), )
-print('+-- train ds shape: [', len(train_ds))
-print('+-- val   ds shape: [', len(val_ds))
+print('+-- dataset  shape: [', len(data)    , inp_sz+out_sz, ']')
+print('+-- train ds shape: [', len(train_ds), inp_sz+out_sz, ']')
+print('+-- val   ds shape: [', len(val_ds)  , inp_sz+out_sz, ']')
 
 train_noBatch = len(train_ds) / batch_sz
 val_noBatch = len(val_ds) / batch_sz
@@ -55,9 +55,9 @@ print('+-- val   batchs #: ', val_noBatch)
 
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-Loss_train = 0 
-model.train()
-model.train() 
+
+
+"""
 for epoch in range(epochs):
     with tqdm(train_loader, unit="batch") as tepoch:
         for batch in tepoch:
@@ -72,13 +72,15 @@ for epoch in range(epochs):
             train_loss.backward()
             optimizer.step()
 
-    Loss_train += train_loss.item() / batch_sz
-
-    tepoch.set_postfix(loss=Loss_train, accuracy=100. * train_accy)
+            Loss_train += train_loss.item() / batch_sz
+            tepoch.set_postfix(loss=Loss_train, accuracy=100. * train_accy)
 """
+
+Loss_train = 0 
+Loss_val = 0
 for epoch in range(epochs):
-    print(epoch)
-    for batch in train_loader:
+    model.train()
+    for batch, i in enumerate(train_loader):
         train_feat = batch["data"].to(device).to(torch.float32)
         train_labs = batch["target"].to(device).to(torch.float32)
         train_pred = model.forward(train_feat)
@@ -89,7 +91,21 @@ for epoch in range(epochs):
         optimizer.step()
 
         Loss_train += train_loss.item()
-    Loss_train /= 1028 
+        print(f"\r Training - batch: {i} / {train_noBatch}.")
+    Loss_train /= batch_sz
 
-#torch.jit.load(model, "/home/hmarefat/scratch/torchFOAM/nnTraining/best_model_0510235.pt")
-"""
+    model.eval()
+    for batch, i in enumerate(val_loader):
+        val_feat = batch["data"].to(device).to(torch.float32)
+        val_labs = batch["target"].to(device).to(torch.float32)
+        val_pred = model.forward(val_feat)
+        val_loss = torch.nn.functional.mse_loss(val_pred, val_labs)
+
+        optimizer.zero_grad()
+        val_loss.backward()
+        optimizer.step()
+
+        Loss_val += val_loss.item()
+        print(f"\r Validation - batch: {i} / {val_noBatch}.")
+    print(f"\r Epoch: {epoch} / {epochs}, Train Loss: {Loss_train}, Val Loss: {Loss_val}.")
+
