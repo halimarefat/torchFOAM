@@ -18,4 +18,5 @@ class nnModel(torch.nn.Module):
             x = self.hidl(x)
             x = self.actn(x)
         x = self.outl(x)
+        return x
 

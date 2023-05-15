@@ -11,14 +11,13 @@ class CustomDataset(torch.utils.data.Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        data = self.data[idx][0:8]
-        labels = self.data[idx][9] 
+        data = self.data[idx][0:-1]
+        labels = np.expand_dims(self.data[idx][-1], axis=1)
         sample = {"data": data, "target": labels}
         return sample
 
-data = CustomDataset('/home/hmarefat/scratch/torchFOAM/datasetGen/dataset_scaled.npy')
 
-print(len(data))
+data = CustomDataset('/home/hmarefat/scratch/torchFOAM/datasetGen/dataset_460_490.npy')
 
 train_val_split = 0.8
 batch_sz = 1028
@@ -31,6 +30,7 @@ train_ds, val_ds = torch.utils.data.random_split(data, [train_sz, val_sz])
 
 train_loader = torch.utils.data.DataLoader(train_ds, batch_size=batch_sz, shuffle=True)
 val_loader = torch.utils.data.DataLoader(val_ds, batch_size=batch_sz, shuffle=True)
+
 
 model = nnModel(inp_s=9, hid_s=63, out_s=1, layer_num=4)
 model.to(device)
@@ -49,20 +49,23 @@ print('+-- dataset  shape: ', len(data))
 
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-train_loss = 0 
+Loss_train = 0 
 model.train()
 for epoch in range(epochs):
+    print(epoch)
     for batch in train_loader:
-        
-        train_feat = batch.data.to(device)
-        train_labs = batch.target.to(device)
+        train_feat = batch["data"].to(device).to(torch.float32)
+        train_labs = batch["target"].to(device).to(torch.float32)
         train_pred = model.forward(train_feat)
-        train_loss += torch.nn.functional.mse_loss(train_pred, train_labs)
+        print(train_labs.size(), '\n', train_pred.size())
+        train_loss = torch.nn.functional.mse_loss(train_pred, train_labs)
 
         optimizer.zero_grad()
         train_loss.backward()
         optimizer.step()
-    train_loss /= 1028 
+
+        Loss_train += train_loss.item()
+    Loss_train /= 1028 
 
 #torch.jit.load(model, "/home/hmarefat/scratch/torchFOAM/nnTraining/best_model_0510235.pt")
 
