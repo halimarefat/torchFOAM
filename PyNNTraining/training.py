@@ -11,9 +11,9 @@ class CustomDataset(torch.utils.data.Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        features = self.data[idx][0:8]
+        data = self.data[idx][0:8]
         labels = self.data[idx][9] 
-        sample = {"data": features, "target": labels}
+        sample = {"data": data, "target": labels}
         return sample
 
 data = CustomDataset('/home/hmarefat/scratch/torchFOAM/datasetGen/dataset_scaled.npy')
