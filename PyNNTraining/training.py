@@ -12,8 +12,8 @@ class CustomDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         data = self.data[idx][0:-1]
-        labels = np.expand_dims(self.data[idx][-1], axis=1)
-        sample = {"data": data, "target": labels}
+        labels = self.data[idx][-1]
+        sample = {"data": data, "target": np.expand_dims(labels, axis=1)}
         return sample
 
 
