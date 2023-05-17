@@ -10,7 +10,7 @@ class datasetGen():
         self.dirname = dirname
         self.of_data = self.dirname + '/' + caseFolder
         self.ds_path = ''
-        self.ds_name = 'dataset_Re3e3'
+        self.ds_name = 'dataset_Re1e3'
         self.bounded = bounded
         self.lobound = lowbnd
         self.hgbound = highbnd
