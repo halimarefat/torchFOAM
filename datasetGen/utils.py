@@ -2,8 +2,9 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 
 class OFv6:
-    def __init__(self, path, tStart, tEnd, tStep):
+    def __init__(self, path, name, tStart, tEnd, tStep):
         self.path = path
+        self.name = name
         self.tStart = tStart
         self.tEnd = tEnd
         self.tStep = tStep
@@ -49,8 +50,8 @@ class OFv6:
         if(self.scaled):
             ds_scaler = StandardScaler()
             ds_scaler.fit(self.dataset)
-            np.savetxt('./means.txt',ds_scaler.mean_)
-            np.savetxt('./scales.txt',ds_scaler.scale_)
+            np.savetxt('./'+self.name+'_means.txt',ds_scaler.mean_)
+            np.savetxt('./'+self.name+'_scales.txt',ds_scaler.scale_)
             self.dataset = ds_scaler.transform(self.dataset)   
 
         print('Dataset shape: ' + str(self.dataset.shape))

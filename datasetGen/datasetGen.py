@@ -10,7 +10,7 @@ class datasetGen():
         self.dirname = dirname
         self.of_data = self.dirname + '/' + caseFolder
         self.ds_path = ''
-        self.ds_name = 'dataset'
+        self.ds_name = 'dataset_Re3e3'
         self.bounded = bounded
         self.lobound = lowbnd
         self.hgbound = highbnd
@@ -23,7 +23,8 @@ class datasetGen():
                 folders = sorted([int(f) for f in folders if f != '0' and f.isnumeric() and int(f)>=self.lobound and int(f)<=self.hgbound])
             else:
                 folders = sorted([int(f) for f in folders if f != '0' and f.isnumeric()])
-            of_reader = OFv6(self.of_data, tStart=folders[0], tEnd=folders[-1], tStep=folders[1]-folders[0])
+            of_reader = OFv6(self.of_data, name=self.ds_name + '_' + str(folders[0]) + '_' + str(folders[-1]), 
+                             tStart=folders[0], tEnd=folders[-1], tStep=folders[1]-folders[0])
             ds = of_reader.dataset_generator()
             self.ds_path = self.cwd + '/' + self.ds_name + '_' + str(folders[0]) + '_' + str(folders[-1]) + '.npy'
             np.savetxt(self.ds_path, ds)
