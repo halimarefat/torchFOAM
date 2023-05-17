@@ -35,7 +35,5 @@ np.savetxt('./'+name+'_means.txt',ds_scaler.mean_)
 np.savetxt('./'+name+'_scales.txt',ds_scaler.scale_)
 scaled_ds = ds_scaler.transform(ds)  
 
-print('+-- max before scaling: ', max(ds))
-print('+-- max after  scaling: ', max(scaled_ds))
 print('+-- mixed ds shape    : ', scaled_ds.shape)
 np.savetxt(name+'.npy', scaled_ds)
