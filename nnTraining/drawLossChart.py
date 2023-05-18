@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import os
 
-count = 600
-file = "_train_0510235.log"
+count = 255
+file = "_train_0517231b.log"
 epochs = []
 tloss = []
 vloss = []
@@ -22,6 +22,6 @@ if(os.path.exists(file)):
     plt.xlabel('Epoch')
     plt.ylabel('Loss [%]')
     plt.legend(['Training', 'Validation'])
-    plt.savefig('loss_chart_0510235.png')
+    plt.savefig('loss_chart_0517231b.png')
 else:
     print("no such file ".join(file))

@@ -43,7 +43,7 @@ TORCH_MODULE(simpleNN);
 
 class newNNImpl : public torch::nn::Module 
 {
-  torch::nn::Linear lin1, lin2, lin3, lin4, lin5, lin6;
+  torch::nn::Linear lin1, lin2, lin3, lin4, lin5, lin6, lin7, lin8, lin9, lin10, lin11;
   
 public:
   newNNImpl(const int64_t in_size, const int64_t hid_size, const int64_t out_size)
@@ -52,7 +52,12 @@ public:
       lin3(torch::nn::LinearOptions(hid_size, hid_size)),
       lin4(torch::nn::LinearOptions(hid_size, hid_size)),
       lin5(torch::nn::LinearOptions(hid_size, hid_size)),
-      lin6(torch::nn::LinearOptions(hid_size, out_size)) 
+      lin6(torch::nn::LinearOptions(hid_size, hid_size)),
+      lin7(torch::nn::LinearOptions(hid_size, hid_size)),
+      lin8(torch::nn::LinearOptions(hid_size, hid_size)),
+      lin9(torch::nn::LinearOptions(hid_size, hid_size)),
+      lin10(torch::nn::LinearOptions(hid_size, hid_size)),
+      lin11(torch::nn::LinearOptions(hid_size, out_size)) 
   {
     register_module("linear1", lin1);
     register_module("linear2", lin2);
@@ -60,6 +65,11 @@ public:
     register_module("linear4", lin4);
     register_module("linear5", lin5);
     register_module("linear6", lin6);
+    register_module("linear7", lin7);
+    register_module("linear8", lin8);
+    register_module("linear9", lin9);
+    register_module("linear10", lin10);
+    register_module("linear11", lin11);
   }
 
   torch::Tensor forward(torch::Tensor& x) 
@@ -68,8 +78,13 @@ public:
     x = torch::relu(lin2->forward(x));
     x = torch::relu(lin3->forward(x)); 
     x = torch::relu(lin4->forward(x)); 
-    x = torch::relu(lin5->forward(x));  
-    x = lin6->forward(x);
+    x = torch::relu(lin5->forward(x));
+    x = torch::relu(lin6->forward(x)); 
+    x = torch::relu(lin7->forward(x)); 
+    x = torch::relu(lin8->forward(x)); 
+    x = torch::relu(lin9->forward(x)); 
+    x = torch::relu(lin10->forward(x));   
+    x = lin11->forward(x);
     return x;
   }
 };

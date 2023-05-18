@@ -6,7 +6,7 @@ struct Options
 {
   const std::string file_path = "/home/hmarefat/scratch/torchFOAM/datasetGen/ds_Re1e3_Re3e3_600_1200.npy";
   const int64_t in_s          = 9;
-  const int64_t hd_s          = 63; //256;
+  const int64_t hd_s          = 8; //256;
   const int64_t ot_s          = 1;
   const int64_t numbOfEpochs  = 600;
   const int64_t batchSize     = 1028; //524288; // size of one time-step >> 524288;
