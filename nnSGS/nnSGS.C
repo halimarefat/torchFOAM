@@ -154,12 +154,37 @@ void nnSGS<BasicTurbulenceModel>::correct()
     LESeddyViscosity<BasicTurbulenceModel>::correct();
 
     const int64_t in_s = 9;
-    const int64_t hd_s = 256;
+    const int64_t hd_s = 63; //256;
     const int64_t ot_s = 1;
     torch::DeviceType device = torch::kCPU; //kCUDA;
 
-    simpleNN model(in_s, hd_s, ot_s);
-    torch::load(model, "../nnTraining/best_model_new.pt");
+    int num_inputs = 9;
+    int num_outputs = 1;
+
+    float means [in_s+ot_s] = {1.000013622185760065e+00
+                            ,-3.242322583163491140e-05
+                            ,-2.501091846949404264e-05
+                            ,-2.984414432006399741e-08
+                            ,-1.814926145888257167e-05
+                            ,9.966951957900526183e-06
+                            ,1.491419986230899222e-08
+                            ,1.012929592423972365e-05
+                            ,1.488477140853993890e-08
+                            ,2.107347679276886342e-04};
+    float stds  [in_s+ot_s] = {5.506809586499618325e-02
+                            ,1.734005998353918901e-02
+                            ,1.735772506395298967e-02
+                            ,6.644725533969407516e-02
+                            ,7.958981269115324164e-02
+                            ,7.998241736245030598e-02
+                            ,5.677093472276837499e-02
+                            ,4.532058630650669800e-02
+                            ,5.658769966930470713e-02
+                            ,7.237815949612259880e-02};
+
+
+    newNN model(in_s, hd_s, ot_s);
+    torch::load(model, "../nnTraining/best_model_052323.pt");
 
     volScalarField u_ = this->U_.component(vector::X);
     volScalarField v_ = this->U_.component(vector::Y);
@@ -179,15 +204,15 @@ void nnSGS<BasicTurbulenceModel>::correct()
     forAll(u_, i)
     {
         std::vector<double> tmp;
-        tmp.push_back(u_[i]);
-        tmp.push_back(v_[i]);
-        tmp.push_back(w_[i]);
-        tmp.push_back(S11[i]);
-        tmp.push_back(S12[i]);
-        tmp.push_back(S13[i]);
-        tmp.push_back(S22[i]);
-        tmp.push_back(S23[i]);
-        tmp.push_back(S33[i]);
+        tmp.push_back((u_[i]-means[0])/stds[0]);
+        tmp.push_back((v_[i]-means[1])/stds[1]);
+        tmp.push_back((w_[i]-means[2])/stds[2]);
+        tmp.push_back((S11[i]-means[3])/stds[3]);
+        tmp.push_back((S12[i]-means[4])/stds[4]);
+        tmp.push_back((S13[i]-means[5])/stds[5]);
+        tmp.push_back((S22[i]-means[6])/stds[6]);
+        tmp.push_back((S23[i]-means[7])/stds[7]);
+        tmp.push_back((S33[i]-means[8])/stds[8]);
 
         in_data.push_back(tmp);
     }
@@ -209,7 +234,7 @@ void nnSGS<BasicTurbulenceModel>::correct()
         auto pred = model->forward(feat);
         forAll(this->Cs_, i)
         {
-            this->Cs_[i] = pred[i].item<float>();
+            this->Cs_[i] = pred[i].item<float>() * stds[9] + means[9];
         }
     }
     

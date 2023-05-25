@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import os
 
-count = 255
+count = 436
 file = "_train_052323.log"
 epochs = []
 tloss = []
@@ -17,8 +17,8 @@ if(os.path.exists(file)):
         epochs.append(float(l[0]))
         tloss.append(float(l[1])*100)
         vloss.append(float(l[2])*100)
-    plt.semilogy(epochs, tloss)
-    plt.semilogy(epochs, vloss)
+    plt.plot(epochs, tloss)
+    plt.plot(epochs, vloss)
     plt.xlabel('Epoch')
     plt.ylabel('Loss [%]')
     plt.legend(['Training', 'Validation'])
