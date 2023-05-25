@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import os
 
 count = 255
-file = "_train_0517231b.log"
+file = "_train_052323.log"
 epochs = []
 tloss = []
 vloss = []
@@ -15,13 +15,13 @@ if(os.path.exists(file)):
         line = f.readline()
         l = line.split()
         epochs.append(float(l[0]))
-        tloss.append(float(l[1])*100.0)
-        vloss.append(float(l[2])*100.0)
-    plt.plot(epochs, tloss)
-    plt.plot(epochs, vloss)
+        tloss.append(float(l[1])*100)
+        vloss.append(float(l[2])*100)
+    plt.semilogy(epochs, tloss)
+    plt.semilogy(epochs, vloss)
     plt.xlabel('Epoch')
     plt.ylabel('Loss [%]')
     plt.legend(['Training', 'Validation'])
-    plt.savefig('loss_chart_0517231b.png')
+    plt.savefig('loss_chart_052323.png')
 else:
     print("no such file ".join(file))
