@@ -184,7 +184,7 @@ void nnSGS<BasicTurbulenceModel>::correct()
 
 
     newNN model(in_s, hd_s, ot_s);
-    torch::load(model, "../nnTraining/best_model_052323.pt");
+    torch::load(model, "/localscratch/hmarefat.6955380.0/best_model_052323.pt"); //"../nnTraining/best_model_052323.pt");
 
     volScalarField u_ = this->U_.component(vector::X);
     volScalarField v_ = this->U_.component(vector::Y);
