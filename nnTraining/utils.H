@@ -17,7 +17,7 @@ std::pair<DatasetType, DatasetType> datasetCreator(Options& options)
 
   //double u,v,w,s1,s2,s3,s4,s5,s6,cs;
   double up1,up2,up3,up4,up5,up6,s1,s2,s3,s4,s5,s6,cs;
-  while(fistream >> u)
+  while(fistream >> up1) //u)
   {
     std::vector<double> tmp_inp;
     //fistream >> v >> w >> s1 >> s2 
