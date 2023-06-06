@@ -101,9 +101,9 @@ public:
     x = torch::relu(lin1->forward(x));
     x = torch::relu(lin2->forward(x));
     x = torch::relu(lin3->forward(x));
-    x = torch::dropout(x, 0.1, is_training()); 
+    //x = torch::dropout(x, 0.1, is_training()); 
     x = torch::relu(lin4->forward(x));
-    x = torch::dropout(x, 0.1, is_training()); 
+    //x = torch::dropout(x, 0.1, is_training()); 
     x = torch::relu(lin5->forward(x));   
     x = lin6->forward(x);
     return x;
