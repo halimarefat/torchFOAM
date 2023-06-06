@@ -219,14 +219,14 @@ void nnSGS<BasicTurbulenceModel>::correct()
     //std::cout << u_[0] << v_[0] << w_[0] << S11[0] << S12[0] << S13[0] << S22[0] << S23[0] << S33[0] << std::endl;
     //std::cout << "+--- in_data: " << in_data[0] << std::endl;
     const int64_t batchSize = in_data.size();
-    Info << "+--- batch size: " << batchSize << nl;
+    //Info << "+--- batch size: " << batchSize << nl;
     auto feat_ds  = CustomDataset(in_data, in_s).map(torch::data::transforms::Stack<>());
     auto dsloader = torch::data::make_data_loader<torch::data::samplers::SequentialSampler>
                           ( std::move(feat_ds), batchSize);
-    Info << "+--- data loader is ready." << nl;
+    //Info << "+--- data loader is ready." << nl;
 
     model->to(device);
-    Info << "+--- nn model is loaded to device." << nl;
+    //Info << "+--- nn model is loaded to device." << nl;
     for(torch::data::Example<>& batch : *dsloader)
     {
         auto feat = batch.data.to(device).to(torch::kFloat32);

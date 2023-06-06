@@ -19,7 +19,7 @@ class OFv6:
 
         skip = 20
         numSample = int(ls[skip])
-        if file.split('/')[-1] == 'S_ij' or file.split('/')[-1] == 'U':
+        if file.split('/')[-1] == 'S_ij' or file.split('/')[-1] == 'U' or file.split('/')[-1] == 'UPrime2Mean':
             data = [[v for v in np.float_(ls[l][1:-2].split())] for l in range(skip+2, numSample+skip+2)]
         elif file.split('/')[-1] == 'Cs':
             data = [[v for v in np.float_(ls[l].split())] for l in range(skip+2, numSample+skip+2)]
@@ -29,10 +29,12 @@ class OFv6:
     def data_collector(self, path):
         
         Sij = self.reader(path + '/S_ij')
+        UP = self.reader(path + '/UPrime2Mean')
         U = self.reader(path + '/U')
         Cs = self.reader(path + '/Cs')
         
-        return np.concatenate((U,Sij,Cs),axis=1)
+        #return np.concatenate((U,Sij,Cs),axis=1)
+        return np.concatenate((UP,Sij,Cs),axis=1)
 
 
     def dataset_generator(self):
