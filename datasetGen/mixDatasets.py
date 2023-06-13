@@ -1,11 +1,11 @@
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
-ds_1 = np.loadtxt('dataset_Re1e3_600_1200.npy')
-ds_2 = np.loadtxt('dataset_Re3e3_600_1200.npy')
+ds_1 = np.loadtxt('dynSmagCase_600_1200.npy')
+ds_2 = np.loadtxt('_dynSmagCase_Re3e3_600_1200.npy')
 
-file_mean = ['dataset_Re1e3_600_1200_means.txt', 'dataset_Re3e3_600_1200_means.txt']
-file_scales = ['dataset_Re1e3_600_1200_scales.txt', 'dataset_Re3e3_600_1200_scales.txt']
+file_mean = ['dynSmagCase_600_1200_means.txt', '_dynSmagCase_Re3e3_600_1200_means.txt']
+file_scales = ['dynSmagCase_600_1200_scales.txt', '_dynSmagCase_Re3e3_600_1200_scales.txt']
 
 mean = np.zeros((10,2))
 stds = np.zeros((10,2))
@@ -27,7 +27,7 @@ for i in range(len(ds_2)):
     
 ds = np.concatenate((ds_1, ds_2))
 
-name = 'ds_Re1e3_Re3e3_600_1200'
+name = 'ds_UPSij_Re1e3_Re3e3_600_1200'
 
 ds_scaler = StandardScaler()
 ds_scaler.fit(ds)
