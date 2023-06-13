@@ -6,7 +6,7 @@ struct Options
 {
   const std::string file_path = "/home/hmarefat/scratch/torchFOAM/datasetGen/dynSmagCase_600_1200.npy";
   const int64_t in_s          = 12; //9;
-  const int64_t hd_s          = 48; //72; //63; //256;
+  const int64_t hd_s          = 64; //48; //72; //63; //256;
   const int64_t ot_s          = 1;
   const int64_t numbOfEpochs  = 600;
   const int64_t batchSize     = 1028; //524288; // size of one time-step >> 524288;
