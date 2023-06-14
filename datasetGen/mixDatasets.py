@@ -7,8 +7,8 @@ ds_2 = np.loadtxt('_dynSmagCase_Re3e3_600_1200.npy')
 file_mean = ['dynSmagCase_600_1200_means.txt', '_dynSmagCase_Re3e3_600_1200_means.txt']
 file_scales = ['dynSmagCase_600_1200_scales.txt', '_dynSmagCase_Re3e3_600_1200_scales.txt']
 
-mean = np.zeros((10,2))
-stds = np.zeros((10,2))
+mean = np.zeros((13,2))
+stds = np.zeros((13,2))
 
 for j in range(len(file_mean)):
     with open(file_mean[j], "r") as fin_mean:
