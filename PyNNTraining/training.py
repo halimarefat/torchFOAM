@@ -16,34 +16,37 @@ class CustomDataset(torch.utils.data.Dataset):
         sample = {"data": data, "target": np.expand_dims(labels, axis=0)}
         return sample
 
-
-data = CustomDataset('/home/hmarefat/scratch/torchFOAM/datasetGen/dataset_scaled.npy')
+train_ds = CustomDataset('/home/hmarefat/scratch/torchFOAM/datasetGen/dynSmagProbes_train_norm.npy')
+val_ds = CustomDataset('/home/hmarefat/scratch/torchFOAM/datasetGen/dynSmagProbes_test_norm.npy')
+#data = CustomDataset('/home/hmarefat/scratch/torchFOAM/datasetGen/dataset_scaled.npy')
 
 train_val_split = 0.8
 batch_sz = 1028
-inp_sz = 9
+inp_sz = 15 #9
 out_sz = 1
-hid_sz = 63
-lay_nm = 4
+hid_sz = 12 #63
+lay_nm = 2 #4
 device = torch.device("cuda")
 epochs = 600
-train_sz = int(train_val_split * len(data))
-val_sz = len(data) - train_sz
+#train_sz = int(train_val_split * len(data))
+#val_sz = len(data) - train_sz
 
-train_ds, val_ds = torch.utils.data.random_split(data, [train_sz, val_sz]) 
+#train_ds = torch.utils.data.Subset(data, range(train_sz))
+#val_ds = torch.utils.data.Subset(data, range(train_sz, train_sz + val_sz))
 
-train_loader = torch.utils.data.DataLoader(train_ds, batch_size=batch_sz, shuffle=True,
-                                           pin_memory=True, drop_last=True)
-val_loader   = torch.utils.data.DataLoader(val_ds, batch_size=batch_sz, shuffle=True,
-                                           pin_memory=True, drop_last=True)
+#train_ds, val_ds = torch.utils.data.random_split(data, [train_sz, val_sz]) 
 
+train_loader = torch.utils.data.DataLoader(train_ds, batch_size=batch_sz, shuffle=False)#,
+                                           #pin_memory=True, drop_last=True)
+val_loader   = torch.utils.data.DataLoader(val_ds, batch_size=batch_sz, shuffle=False)#,
+                                           #pin_memory=True, drop_last=True)
 
 model = nnModel(inp_s=inp_sz, hid_s=hid_sz, out_s=out_sz, layer_num=lay_nm)
 model.to(device)
 
 print('+-- model summary:')
 print(model)
-print('+-- dataset  shape: [', len(data)    ,',', inp_sz+out_sz, ']')
+#print('+-- dataset  shape: [', len(data)    ,',', inp_sz+out_sz, ']')
 print('+-- train ds shape: [', len(train_ds),',', inp_sz+out_sz, ']')
 print('+-- val   ds shape: [', len(val_ds)  ,',', inp_sz+out_sz, ']')
 
@@ -54,8 +57,6 @@ print('+-- train batchs #: ', train_noBatch)
 print('+-- val   batchs #: ', val_noBatch)
 
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-
-
 
 """
 for epoch in range(epochs):
@@ -76,6 +77,7 @@ for epoch in range(epochs):
             tepoch.set_postfix(loss=Loss_train, accuracy=100. * train_accy)
 """
 
+best_loss = 1e10
 
 for epoch in range(epochs):
     model.train()
@@ -109,5 +111,9 @@ for epoch in range(epochs):
         Loss_val += val_loss.item()
         batch_indx += 1
     Loss_val /= batch_sz
+    
+    if (Loss_val < best_loss):
+        torch.save(model, "./best_model.pt")
+        best_loss = Loss_val
     print(f"Epoch: {epoch} / {epochs}, Train Loss: {Loss_train}, Val Loss: {Loss_val}.")
 
