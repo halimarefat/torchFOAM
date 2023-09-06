@@ -1,0 +1,415 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  3.0.x                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../meshSetup"
+
+application     awcm;
+
+startFrom       $startF; 
+
+startTime       $TBEG;
+
+stopAt          endTime;
+
+endTime         $TMAX;
+
+deltaT          $DT;
+
+writeControl    $wrC;
+
+writeInterval   $WI;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+adjustTimeStep   yes;
+
+maxCo            $maxCor;
+
+functions
+{
+    postLESFunc
+    {
+        functionObjectLibs  ("libutilityFunctionObjects.so");
+        type                coded;
+        redirectType        postLESFunc;
+        writeControl        timeStep; //outputTime; //
+        enabled             true;
+
+        codeInclude
+        #{
+            #include "turbulentTransportModels.H"
+            #include "turbulentTransportModel.H"
+            #include "turbulenceModel.H"
+            #include "LESeddyViscosity.H"
+            #include "simpleFilter.H"
+            #include "LESfilter.H"
+            #include <chrono>
+            #include <vector>
+            #include <numeric>
+            #include <map>
+            #include <set>
+        #};
+        
+        codeOptions
+        #{
+            -I$(LIB_SRC)/meshTools/lnInclude \
+            -I$(FOAM_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
+            -I$(FOAM_SRC)/TurbulenceModels/incompressible/lnInclude \
+            -I$(FOAM_SRC)/transportModels \
+        #};
+
+        codeExecute
+        #{
+            const volVectorField& U = mesh().lookupObject<volVectorField>("U");
+            volTensorField gradU = fvc::grad(U);
+            volSymmTensorField S(symm(gradU));
+            const Foam::incompressible::turbulenceModel&  turbulence = mesh().thisDb().lookupObject<Foam::incompressible::turbulenceModel>("turbulenceProperties");            
+            const tmp<volScalarField> tmp_k = turbulence.k();
+            const volScalarField& k_sgs = tmp_k;
+            const tmp<volScalarField> tmp_eps = turbulence.epsilon();
+            const volScalarField& eps = tmp_eps;            
+            //volScalarField enstr  = 0.5*magSqr(fvc::curl(U));
+            volVectorField omega  = fvc::curl(U);
+            volScalarField omega2 = omega&omega;
+            
+            static autoPtr<volScalarField> skewns;
+            static autoPtr<volScalarField> vortSt;
+            static autoPtr<volScalarField> strain;
+            static autoPtr<volScalarField> Qg_;
+            static autoPtr<volScalarField> Rg_;
+            static autoPtr<volScalarField> Qs_;
+            static autoPtr<volScalarField> Rs_;
+            static autoPtr<volScalarField> enstr;
+            
+            if(!skewns.valid() && !vortSt.valid() && !strain.valid())
+            {
+                enstr.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "enstrophy",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        0.5*magSqr(fvc::curl(U)) 
+                    )
+                );
+
+                skewns.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "skewness",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        -1.0/3.0*(S && (S & S)) //-6*pow(15, 0.5)*(omega & (omega & S)) / (7*pow(omega2, 1.5))    
+                    )
+                );
+
+                vortSt.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "vortexStretching",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        omega & (omega & S)
+                    )
+                );
+
+                strain.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "strainSeflAmp",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        (S & S) && S
+                    )
+                );
+                
+                Qg_.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "Qg",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        0.5*sqr(tr(gradU)) - tr(gradU&gradU)
+                    )
+                );
+
+                Rg_.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "Rg",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        -1.0/3 *( (S&&(S&S)) + (3.0/4.0 * (omega*omega)&&S))
+                    )
+                );
+
+                Qs_.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "Qs",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        -0.5*tr(S & S) 
+                    )
+                );
+
+                Rs_.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "Rs",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        -1.0/3.0*(S && (S & S))
+                    )
+                );
+
+                
+            }
+            volScalarField& skewness = skewns();
+            volScalarField& vortexStretching = vortSt();
+            volScalarField& strainSeflAmp = strain();
+            volScalarField& Qg = Qg_();
+            volScalarField& Rg = Rg_();
+            volScalarField& Qs = Qs_();
+            volScalarField& Rs = Rs_();
+            volScalarField& enstrophy = enstr();
+            
+            if(mesh().time().writeTime())
+            {
+                k_sgs.write();
+                eps.write();
+                skewness.checkIn();
+                skewness.write();
+                vortexStretching.checkIn();
+                vortexStretching.write();
+                strainSeflAmp.checkIn();
+                strainSeflAmp.write();
+                Qg.checkIn();
+                Qg.write();
+                Rg.checkIn();
+                Rg.write();
+                Qs.checkIn();
+                Qs.write();
+                Rs.checkIn();
+                Rs.write();
+                enstrophy.checkIn();
+                enstrophy.write();
+            }
+
+        #};
+    }
+    
+
+    fieldAverage1
+    {
+        type            fieldAverage;
+        functionObjectLibs ( "libfieldFunctionObjects.so" );
+        enabled         true;
+        writeControl    outputTime;
+	    resetOnRestart  true;
+	
+        fields
+        (
+            U
+            {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+		        window      1000;
+            }
+        );
+    }
+    //#includeFunc probes
+    //#includeFunc probes_POD
+    //#includeFunc singleGraph1
+    //#includeFunc singleGraph2
+    //#includeFunc singleGraph3
+    //#includeFunc singleGraph4
+    //#includeFunc surfaces1
+    //#includeFunc surfaces2
+    //#includeFunc surfaces3
+    //#includeFunc surfaces4
+    //#includeFunc surfaces5
+    //#includeFunc wallShearStress
+    #include "forces";
+    #include "forceCoeffs";
+}
+
+libs ("/home/hmarefat/projects/def-alamj/hmarefat/PhD-OpenFOAM/applications/libs/libCanopyModel.so" 
+      "/home/hmarefat/projects/def-alamj/shared/libs/v6/libAtmosphericTurbulenceModels.so");
+/*      
+functions
+{
+    postLESFunc
+    {
+        functionObjectLibs  ("libutilityFunctionObjects.so");
+        type                coded;
+        redirectType        postLESFunc;
+        writeControl        outputTime;
+        enabled             true;
+
+        codeInclude
+        #{
+            #include "turbulenceModel.H"
+            #include "turbulentTransportModel.H"
+            #include <chrono>
+            #include <vector>
+            #include <numeric>
+            #include <map>
+        #};
+        
+        codeOptions
+        #{
+            -I$(LIB_SRC)/meshTools/lnInclude \
+            -I$(FOAM_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
+            -I$(FOAM_SRC)/TurbulenceModels/incompressible/lnInclude \
+            -I$(FOAM_SRC)/transportModels \
+        #};
+
+        codeExecute
+        #{
+            const Foam::incompressible::turbulenceModel&  turbulence = mesh().thisDb().lookupObject<Foam::incompressible::turbulenceModel>("turbulenceProperties");
+            const tmp<volScalarField> tmp_k = turbulence.k();
+            const volScalarField& k_sgs = tmp_k;
+            const tmp<volScalarField> tmp_eps = turbulence.epsilon();
+            const volScalarField& eps = tmp_eps;
+            // const volSymmTensorField& UPrime2Mean = mesh().lookupObject<volSymmTensorField>("UPrime2Mean");
+            const tmp<volSymmTensorField> RR = turbulence.R();
+		    const volSymmTensorField&     R = RR();
+            volScalarField Rxx(R.component(symmTensor::XX));
+            volScalarField Ryy(R.component(symmTensor::YY));
+            volScalarField Rzz(R.component(symmTensor::ZZ));
+
+            volScalarField k_res = 0.5 * (Rxx + Ryy + Rzz);
+	        // scalar rTKE = average(tr(UPrime2Mean)).value()/average(tr(R + UPrime2Mean)).value();
+            scalar eps_avg = average(eps).value();
+            scalar k_sgs_avg = average(k_sgs).value();
+            scalar k_res_avg = average(k_res).value();
+            scalar M = k_sgs_avg / (k_sgs_avg + k_res_avg);
+
+            Info << "Average espsilon: " << eps_avg << nl;
+            Info << "Average K_sgs: " << k_sgs_avg << nl;
+            Info << "M: " << M << nl;
+            //if (mesh().time().writeTime())
+            //{
+            //    a.write();
+            //    b.write();
+            //}
+        #};
+    }
+
+    fieldAverage1
+    {
+        type            fieldAverage;
+        functionObjectLibs ( "libfieldFunctionObjects.so" );
+        enabled         true;
+        writeControl   outputTime;
+	    resetOnRestart  true;
+	
+        fields
+        (
+            U
+            {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+		        window      1000;
+            }
+
+        );
+    }
+    #includeFunc probes
+    //#includeFunc probes_POD
+    //#includeFunc singleGraph1
+    //#includeFunc singleGraph2
+    //#includeFunc singleGraph3
+    //#includeFunc singleGraph4
+    //#includeFunc surfaces1
+    //#includeFunc surfaces2
+    //#includeFunc surfaces3
+    //#includeFunc surfaces4
+    //#includeFunc surfaces5
+    //#includeFunc wallShearStress
+    #include "forces";
+    #include "forceCoeffs";
+}
+
+libs ("/home/hmarefat/projects/def-alamj/hmarefat/PhD-OpenFOAM/applications/libs/libCanopyModel.so" 
+      "/home/hmarefat/projects/def-alamj/shared/libs/v6/libAtmosphericTurbulenceModels.so");
+
+// ************************************************************************* //
+*/
