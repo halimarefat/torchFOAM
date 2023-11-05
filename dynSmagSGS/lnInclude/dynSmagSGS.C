@@ -1,1 +1,0 @@
-../dynSmagSGS.C
