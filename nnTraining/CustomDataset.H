@@ -18,8 +18,8 @@ public:
 
   torch::data::Example<> get(size_t index) override
   {
-    auto features = torch::from_blob(mdataset[index].first.data(), {moptions.in_s}, torch::kFloat64);
-    auto labels = torch::from_blob(&mdataset[index].second, {moptions.ot_s}, torch::kFloat64);
+    auto features = torch::from_blob(mdataset[index].first.data(), {moptions.in_s}, torch::kDouble); //kFloat64);
+    auto labels = torch::from_blob(&mdataset[index].second, {moptions.ot_s}, torch::kDouble); //kFloat64);
 
     return {features.clone(), labels.clone()};
   }

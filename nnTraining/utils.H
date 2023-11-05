@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <vector>
 #include "config.H"
@@ -15,32 +16,46 @@ std::pair<DatasetType, DatasetType> datasetCreator(Options& options)
   std::ifstream fistream(options.file_path);
   assert(fistream.is_open());
 
+  double G1, G2, G3, G4, G5, G6, up1,up2,up3,up4,up5,up6, cs;
+  //double u,v,w,up1,up2,up3,up4,up5,up6,cs;
   //double u,v,w,s1,s2,s3,s4,s5,s6,cs;
-  double up1,up2,up3,up4,up5,up6,s1,s2,s3,s4,s5,s6,cs;
-  while(fistream >> up1) //u)
+  //double up1,up2,up3,up4,up5,up6,s1,s2,s3,s4,s5,s6,cs;
+  while(fistream >> G1)
   {
     std::vector<double> tmp_inp;
+    fistream >> G2  >> G3  >> G4  >> G5  >> G6  
+             >> up1 >> up2 >> up3 >> up4 >> up5 >> up6
+             >> cs;
+    //fistream >> v   >> w   >> up1 >> up2 
+    //         >> up3 >> up4 >> up5 >> up6
+    //         >> cs; 
     //fistream >> v >> w >> s1 >> s2 
     //         >> s3 >> s4 >> s5 >> s6
     //         >> cs; 
-    fistream >> up1 >> up2 >> up3 >> up4 >> up5 >> up6 >>
-                s1  >> s2  >> s3  >> s4  >> s5  >> s6  >> 
-                cs; 
+    //fistream >> up1 >> up2 >> up3 >> up4 >> up5 >> up6 >>
+    //            s1  >> s2  >> s3  >> s4  >> s5  >> s6  >> 
+    //            cs; 
     //tmp_inp.push_back(u);
     //tmp_inp.push_back(v);
     //tmp_inp.push_back(w);
+    tmp_inp.push_back(G1);
+    tmp_inp.push_back(G2);
+    tmp_inp.push_back(G3);
+    tmp_inp.push_back(G4);
+    tmp_inp.push_back(G5);
+    tmp_inp.push_back(G6);
     tmp_inp.push_back(up1);
     tmp_inp.push_back(up2);
     tmp_inp.push_back(up3);
     tmp_inp.push_back(up4);
     tmp_inp.push_back(up5);
     tmp_inp.push_back(up6);
-    tmp_inp.push_back(s1);
-    tmp_inp.push_back(s2);
-    tmp_inp.push_back(s3);
-    tmp_inp.push_back(s4);
-    tmp_inp.push_back(s5);
-    tmp_inp.push_back(s6);
+    //tmp_inp.push_back(s1);
+    //tmp_inp.push_back(s2);
+    //tmp_inp.push_back(s3);
+    //tmp_inp.push_back(s4);
+    //tmp_inp.push_back(s5);
+    //tmp_inp.push_back(s6);
     _dataset.push_back(std::make_pair(tmp_inp, cs));
   } 
 
@@ -86,17 +101,22 @@ std::pair<DatasetType, DatasetType> datasetCreator(Options& options)
   std::ofstream val_fout("val.dat");
   for(auto r : train)
   {
-    train_fout << r.first[0]  << " " << r.first[1]  << " " << r.first[2] << " " << r.first[3] << " " << r.first[4] 
-        << " " << r.first[5]  << " " << r.first[6]  << " " << r.first[7] << " " << r.first[8] << " " << r.first[9]
-        << " " << r.first[10] << " " << r.first[11] << " " << r.second 
+    train_fout << std::setprecision(15) << r.first[0]  << " " << r.first[1]  << " " << r.first[2] << " " << r.first[3] << " " << r.first[4] 
+        << " " << r.first[5]  << " " << r.first[6]  << " " << r.first[7] << " " << r.first[8] << " " << r.first[9] 
+        << " " << r.first[10] << " " << r.first[11] << " "<< r.second
+        
+        //<< r.first[9]
+        //<< " " << r.first[10] << " " << r.first[11] << " " << r.second 
         << "\n";
 
   }
   for(auto r : val)
   {
-    val_fout   << r.first[0]  << " " << r.first[1]  << " " << r.first[2] << " " << r.first[3] << " " << r.first[4] 
-        << " " << r.first[5]  << " " << r.first[6]  << " " << r.first[7] << " " << r.first[8] << " " << r.first[9]
-        << " " << r.first[10] << " " << r.first[11] << " " << r.second 
+    val_fout   << std::setprecision(15) << r.first[0]  << " " << r.first[1]  << " " << r.first[2] << " " << r.first[3] << " " << r.first[4] 
+        << " " << r.first[5]  << " " << r.first[6]  << " " << r.first[7] << " " << r.first[8] << " " << r.first[9] 
+        << " " << r.first[10] << " " << r.first[11] << " "<< r.second
+        //<< r.first[9]
+        //<< " " << r.first[10] << " " << r.first[11] << " " << r.second 
         << "\n";
 
   }

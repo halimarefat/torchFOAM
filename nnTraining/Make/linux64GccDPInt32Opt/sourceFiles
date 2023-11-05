@@ -1,2 +1,2 @@
 SOURCE = \
-nnTraining_mod.C 
+nnTraining.C 
