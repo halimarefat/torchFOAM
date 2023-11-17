@@ -39,3 +39,4 @@ _Dockerfile
 */*.dat
 */.ipynb_*
 */*.png
+*/lnInclude

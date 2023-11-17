@@ -25,6 +25,7 @@ LES
     turbulence      on;
     printCoeffs     on;
     delta           $Delta;
+    filter          simple;
     dynamicKEqnCoeffs
     {
         filter simple;
