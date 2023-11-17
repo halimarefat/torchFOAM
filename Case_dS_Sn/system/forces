@@ -1,0 +1,47 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  6
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+
+forces1
+{
+    // Mandatory entries
+    type            forces;
+    libs            ("libforces.so");
+    patches         ("sphere*");
+
+
+    // Optional entries
+
+    // Field names
+    p               p;
+    U               U;
+    rho         rhoInf;
+    rhoInf      100000;
+
+    // Reference pressure [Pa]
+    pRef            0;
+
+    // Include porosity effects?
+    porosity        yes;
+
+    // Store and write volume field representations of forces and moments
+    writeFields     yes;
+
+    // Centre of rotation for moment calculations
+    CofR            (0 0 0);
+
+    // Spatial data binning
+    // - extents given by the bounds of the input geometry
+    binData
+    {
+        nBin        20;
+        direction   (1 0 0);
+        cumulative  yes;
+    }
+}
+
+// ************************************************************************* //

@@ -2,7 +2,7 @@ $(OBJECTS_DIR)/maketurbulentTransportModels.C.dep: \
 maketurbulentTransportModels.C \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/turbulentTransportModels.H \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/simpleFilter.H \
-dynSmagSGS.H \
+SGS_dS.H \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/IncompressibleTurbulenceModel.H \
 $(WM_PROJECT_DIR)/src/transportModels/incompressible/transportModel/transportModel.H \
 $(WM_PROJECT_DIR)/src/OpenFOAM/lnInclude/addToRunTimeSelectionTable.H \
@@ -12,7 +12,7 @@ $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/RASModel.H \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/LESModel.H \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/LESfilter.H \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/LESeddyViscosity.H \
-dynSmagSGS.C \
+SGS_dS.C \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/TurbulenceModel.H \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/incompressibleTurbulenceModel.H \
 $(WM_PROJECT_DIR)/src/finiteVolume/lnInclude/fvMatrix.H \
@@ -733,7 +733,7 @@ $(WM_PROJECT_DIR)/src/OpenFOAM/lnInclude/Barycentric2DI.H \
 
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/turbulentTransportModels.H :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/simpleFilter.H :
-dynSmagSGS.H :
+SGS_dS.H :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/IncompressibleTurbulenceModel.H :
 $(WM_PROJECT_DIR)/src/transportModels/incompressible/transportModel/transportModel.H :
 $(WM_PROJECT_DIR)/src/OpenFOAM/lnInclude/addToRunTimeSelectionTable.H :
@@ -743,7 +743,7 @@ $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/RASModel.H :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/LESModel.H :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/LESfilter.H :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/LESeddyViscosity.H :
-dynSmagSGS.C :
+SGS_dS.C :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/TurbulenceModel.H :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/incompressibleTurbulenceModel.H :
 $(WM_PROJECT_DIR)/src/finiteVolume/lnInclude/fvMatrix.H :

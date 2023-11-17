@@ -25,5 +25,5 @@ License
 
 #include "turbulentTransportModels.H"
 #include "simpleFilter.H"
-#include "dynSmagSGS.H"
-makeLESModel(dynSmagSGS);
+#include "SGS_dS.H"
+makeLESModel(SGS_dS);
