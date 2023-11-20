@@ -136,7 +136,7 @@ castellatedMeshControls
         {
             mode inside;
             //levels ((1E15 4));
-			levels ((1.0 6));
+			levels ((1 6));
         }
     }
 

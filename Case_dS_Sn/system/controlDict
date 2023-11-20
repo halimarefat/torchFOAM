@@ -92,6 +92,6 @@ functions
 
 libs ("/home/hmarefat/projects/def-alamj/hmarefat/libs/libCanopyModel.so" 
       "/home/hmarefat/projects/def-alamj/shared/libs/v6/libAtmosphericTurbulenceModels.so"
-      "/home/hmarefat/scratch/torchFOAM/SGS_dS/SGS_dS.so");
+      "/home/hmarefat/scratch/torchFOAM_/dynSmagSGS/dynSmagSGS.so");
 
 // ************************************************************************* //
