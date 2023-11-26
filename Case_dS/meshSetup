@@ -30,11 +30,11 @@ zMax  4;
    top    (xMin, yMin, zHalf) (xMax, yMax, zMax)
 */
 
-Nx 128;
+Nx 216; //128;
 
-Ny 64; 
+Ny 108; //64; 
 
-Nz 64;
+Nz 108; //64;
 
 zStrch 1;
 
@@ -54,7 +54,7 @@ zForm     1.77828e4;
 // Turbulence
 
 SIMTYPE     LES;
-LESModel    dynSmagSGS;
+LESModel    SGS_dS;
 Delta       cubeRootVol; //vanDriest;
 
 // Run control
@@ -62,11 +62,11 @@ Delta       cubeRootVol; //vanDriest;
 startF    latestTime; //startTime; //
 DT        0.01;
 TBEG      0;
-TMAX      1200; 
+TMAX      300; 
 MICRO     250;
 wrC       adjustableRunTime; //timeStep;
-WI        50;
-maxCor    1.25;
+WI        100;
+maxCor    1.0;
 
 /* toposet information */
 source      sphereToCell; //boxToCell; //cylinderToCell
