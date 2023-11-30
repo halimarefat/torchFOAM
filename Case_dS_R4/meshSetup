@@ -65,7 +65,7 @@ TBEG      0;
 TMAX      310; 
 MICRO     250;
 wrC       timeStep; //adjustableRunTime; //
-WI        5;
+WI        20;
 maxCor    1.0;
 
 /* toposet information */
