@@ -84,21 +84,15 @@ int main(int argc, char* argv[])
     fileName outPath = mesh.time().path()/"postProcessing";
     mkDir(outPath);
 	  autoPtr<OFstream> outPtr;
-    outPtr.reset(new OFstream(outPath/"fieldData_UUp_161_170.dat"));
+    outPtr.reset(new OFstream(outPath/"fieldData.dat"));
 
-    //outPtr() << "t\t" 
-    //         << "Ux\t" << "Uy\t" << "Uz\t" <<  "S1\t" << "S2\t" << "S3\t" << "S4\t" 
-    //         << "S5\t" << "S6\t" << "Cs" << endl; 
     outPtr() << "t\t" 
-             << "Ux\t"   << "Uy\t"   << "Uz\t"   
+             << "Ux\t"   << "Uy\t"   << "Uz\t"
+             << "G1\t"   << "G2\t"   << "G3\t"   << "G4\t"   << "G5\t"   << "G6\t"
+             << "S1\t"   << "S2\t"   << "S3\t"   << "S4\t"   << "S5\t"   << "S6\t"  
              << "UUp1\t" << "UUp2\t" << "UUp3\t" << "UUp4\t" << "UUp5\t" << "UUp6\t" 
              << "Cs" << endl;
-    /*
-    outPtr() << "t\t" 
-             << "G1\t"   << "G2\t"   << "G3\t"   << "G4\t"   << "G5\t"   << "G6\t" 
-             << "UUp1\t" << "UUp2\t" << "UUp3\t" << "UUp4\t" << "UUp5\t" << "UUp6\t" 
-             << "Cs" << endl;
-    */
+    
     //while(runTime.loop())
     //{
     instantList timeDirs = timeSelector::select0(runTime, args);
@@ -127,27 +121,20 @@ int main(int argc, char* argv[])
       
         
         for (label cellI = 0; cellI < mesh.C().size(); cellI++)
-        {
-          //outPtr()<< runTime.timeName() << "\t" 
-          //          << mesh.C()[cellI][0] << "\t" << mesh.C()[cellI][1] << "\t" << mesh.C()[cellI][2] << endl;
-          
-          if(cellI % 10 == 0)
+        {          
+          if(cellI % 50 == 0)
           {
-            outPtr()<< runTime.timeName() << "\t" 
-                    << U  [cellI][0] << "\t" << U  [cellI][1] << "\t" << U  [cellI][2] << "\t" 
-                    << UUp[cellI][0] << "\t" << UUp[cellI][1] << "\t" << UUp[cellI][2] << "\t" 
-                    << UUp[cellI][3] << "\t" << UUp[cellI][4] << "\t" << UUp[cellI][5] << "\t" 
-                    << Cs[cellI] << endl;
-            /*
-            outPtr()<< runTime.timeName() << "\t" 
+            outPtr()<< runTime.timeName() << "\t"
+                    //<< mesh.C()[cellI][0] << "\t" << mesh.C()[cellI][1] << "\t" << mesh.C()[cellI][2] << "\t" 
+                    << U  [cellI][0] << "\t" << U  [cellI][1] << "\t" << U  [cellI][2] << "\t"
                     << G  [cellI][0] << "\t" << G  [cellI][1] << "\t" << G  [cellI][2] << "\t"
                     << G  [cellI][3] << "\t" << G  [cellI][4] << "\t" << G  [cellI][5] << "\t"
+                    << S  [cellI][0] << "\t" << S  [cellI][1] << "\t" << S  [cellI][2] << "\t"
+                    << S  [cellI][3] << "\t" << S  [cellI][4] << "\t" << S  [cellI][5] << "\t" 
                     << UUp[cellI][0] << "\t" << UUp[cellI][1] << "\t" << UUp[cellI][2] << "\t" 
                     << UUp[cellI][3] << "\t" << UUp[cellI][4] << "\t" << UUp[cellI][5] << "\t" 
-                    << Cs [cellI]    << endl;
-            */         
+                    << Cs[cellI] << endl;      
           }
-          
         }
       }
     }
