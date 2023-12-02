@@ -4,7 +4,7 @@
 #SBATCH --nodes=8
 #SBATCH --ntasks-per-node=32
 #SBATCH --time=0-23:00:00
-#SBATCH --mem-per-cpu=800
+#SBATCH --mem-per-cpu=900
 #SBATCH --job-name=Case_dS_R53
 
 module restore torchfoamenv
