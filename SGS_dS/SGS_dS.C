@@ -203,7 +203,7 @@ void SGS_dS<BasicTurbulenceModel>::correct()
 
     if(this->runTime_.outputTime())
     {
-        const char* k_name = "k_sgs";
+        const char* k_name = "k";
         k_.rename(k_name);
         k_.write();
 
