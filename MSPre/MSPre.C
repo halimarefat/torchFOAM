@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
         
         for (label cellI = 0; cellI < mesh.C().size(); cellI++)
         {          
-          if(cellI % 30 == 0)
+          if(cellI % 20 == 0)
           {
             outPtr()<< runTime.timeName() << "\t"
                     //<< mesh.C()[cellI][0] << "\t" << mesh.C()[cellI][1] << "\t" << mesh.C()[cellI][2] << "\t" 
