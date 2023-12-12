@@ -24,12 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include <torch/torch.h>
+#include <torch/script.h>
 #include "nnSGS.H"
 #include "fvOptions.H"
 #include "wallDist.H"
 #include "model.H"
 #include "CustomDataset.H"
 #include <vector>
+#include <memory>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,7 +41,6 @@ namespace LESModels
 {
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 template<class BasicTurbulenceModel>
 void nnSGS<BasicTurbulenceModel>::correctNut
 (
@@ -153,46 +154,70 @@ void nnSGS<BasicTurbulenceModel>::correct()
 
     LESeddyViscosity<BasicTurbulenceModel>::correct();
 
-    const int64_t in_s = 9;
-    const int64_t hd_s = 63; //256;
-    const int64_t ot_s = 1;
-    torch::DeviceType device = torch::kCPU; //kCUDA;
+    
+    //int num_inputs = 9;
+    //int num_outputs = 1;
 
-    int num_inputs = 9;
-    int num_outputs = 1;
-
-    float means [in_s+ot_s] = {1.000013622185760065e+00
-                            ,-3.242322583163491140e-05
-                            ,-2.501091846949404264e-05
-                            ,-2.984414432006399741e-08
-                            ,-1.814926145888257167e-05
-                            ,9.966951957900526183e-06
-                            ,1.491419986230899222e-08
-                            ,1.012929592423972365e-05
-                            ,1.488477140853993890e-08
-                            ,2.107347679276886342e-04};
-    float stds  [in_s+ot_s] = {5.506809586499618325e-02
-                            ,1.734005998353918901e-02
-                            ,1.735772506395298967e-02
-                            ,6.644725533969407516e-02
-                            ,7.958981269115324164e-02
-                            ,7.998241736245030598e-02
-                            ,5.677093472276837499e-02
-                            ,4.532058630650669800e-02
-                            ,5.658769966930470713e-02
-                            ,7.237815949612259880e-02};
+    float means[22] = { 1.544171594630381201e-05,    // "Ux"
+                        -2.560523192857740358e-05,   // "Uy"
+                        -3.247401102078045364e-04,   // "Uz"
+                        7.804831747328077327e-06,    // "G1"
+                        9.082373092743025638e-06,    // "G2"
+                        -2.826031580718503457e-04,   // "G3"
+                        2.956847138544458752e-04,    // "G4"
+                        1.442436366413626285e-04,    // "G5"
+                        -3.247401102078045364e-04,   // "G6"
+                        -1.373993161708686375e-04,   // "S1"
+                        -1.412843425373607918e-04,   // "S2"
+                        2.956847138544458752e-04,    // "S3"
+                        -2.418319111180643510e-06,   // "S4"
+                        9.525723602570234586e-05,    // "S5"
+                        4.281951411933750009e-04,    // "S6"
+                        7.896384510998569087e-06,    // "UUp1"
+                        -7.242505366152104133e-06,   // "UUp2"
+                        1.604121755457488035e-04,    // "UUp3"
+                        5.625850094291776822e-06,    // "UUp4"
+                        1.612462199947330230e-04,    // "UUp5"
+                        3.666401753462222857e-03};   // "UUp6"
 
 
-    newNN model(in_s, hd_s, ot_s);
-    torch::load(model, "/localscratch/hmarefat.6955380.0/best_model_052323.pt"); //"../nnTraining/best_model_052323.pt");
+    float stds[22] = {  1.515229159046805642e-02,    // "Ux"
+                        1.602341504878677242e-02,    // "Uy"
+                        8.615968193033807232e-02,    // "Uz"
+                        5.548788365730993738e-02,    // "G1"
+                        4.599441015626788004e-02,    // "G2"
+                        1.860230653121577593e-01,    // "G3"
+                        6.097452906448685289e-02,    // "G4"
+                        6.929750977780890775e-02,    // "G5"
+                        8.615968193033807232e-02,    // "G6"
+                        8.619717830466355757e-02,    // "S1"
+                        8.868153453850928514e-02,    // "S2"
+                        6.097452906448685289e-02,    // "S3"
+                        4.297573553118718553e-02,    // "S4"
+                        5.630207025453635994e-02,    // "S5"
+                        3.190411418073245062e-03,    // "S6"
+                        7.276168680109836679e-04,    // "UUp1"
+                        7.306797185912870893e-04,    // "UUp2"
+                        1.044051203870081457e-03,    // "UUp3"
+                        1.243064528220244776e-04,    // "UUp4"
+                        1.072069298451816576e-03,    // "UUp5"
+                        7.838572223963288788e-02};   // "UUp6"
 
     volScalarField u_ = this->U_.component(vector::X);
     volScalarField v_ = this->U_.component(vector::Y);
     volScalarField w_ = this->U_.component(vector::Z);
 
-    tmp<volTensorField> tgradU(fvc::grad(this->U_));
-    const volTensorField& gradU = tgradU();
-    volSymmTensorField S(dev(symm(gradU)));
+    //tmp<volTensorField> tgradU(fvc::grad(this->U_));
+    //const volTensorField& gradU = tgradU();
+    volTensorField G = fvc::grad(this->U_);
+    volScalarField G11 = G.component(tensor::XX);
+    volScalarField G12 = G.component(tensor::XY);
+    volScalarField G13 = G.component(tensor::XZ);
+    volScalarField G22 = G.component(tensor::YY);
+    volScalarField G23 = G.component(tensor::YZ);
+    volScalarField G33 = G.component(tensor::ZZ);
+
+    volSymmTensorField S(dev(symm(G)));
     volScalarField S11 = S.component(tensor::XX);
     volScalarField S12 = S.component(tensor::XY);
     volScalarField S13 = S.component(tensor::XZ);
@@ -200,19 +225,111 @@ void nnSGS<BasicTurbulenceModel>::correct()
     volScalarField S23 = S.component(tensor::YZ);
     volScalarField S33 = S.component(tensor::ZZ);
 
+    volSymmTensorField UUp( IOobject("UPrime2Mean", this->runTime_.timeName(), this->mesh_, IOobject::READ_IF_PRESENT), symm(G));
+    //volSymmTensorField UUp = createField<volSymmTensorField>(this->runTime_,this->mesh_,"UPrime2Mean");
+    volScalarField UUp11 = UUp.component(tensor::XX);
+    volScalarField UUp12 = UUp.component(tensor::XY);
+    volScalarField UUp13 = UUp.component(tensor::XZ);
+    volScalarField UUp22 = UUp.component(tensor::YY);
+    volScalarField UUp23 = UUp.component(tensor::YZ);
+    volScalarField UUp33 = UUp.component(tensor::ZZ);
+
+    int64_t in_s = -3999;
+    int64_t ot_s = -3999;
+    int64_t MNum = 1;
+
     std::vector<std::vector<double>> in_data;
     forAll(u_, i)
     {
         std::vector<double> tmp;
-        tmp.push_back((u_[i]-means[0])/stds[0]);
-        tmp.push_back((v_[i]-means[1])/stds[1]);
-        tmp.push_back((w_[i]-means[2])/stds[2]);
-        tmp.push_back((S11[i]-means[3])/stds[3]);
-        tmp.push_back((S12[i]-means[4])/stds[4]);
-        tmp.push_back((S13[i]-means[5])/stds[5]);
-        tmp.push_back((S22[i]-means[6])/stds[6]);
-        tmp.push_back((S23[i]-means[7])/stds[7]);
-        tmp.push_back((S33[i]-means[8])/stds[8]);
+        if(MNum==1)
+        {
+            in_s = 9;
+            ot_s = 1;
+            tmp.push_back((u_[i]-means[0])/stds[0]);
+            tmp.push_back((v_[i]-means[1])/stds[1]);
+            tmp.push_back((w_[i]-means[2])/stds[2]);
+            tmp.push_back((S11[i]-means[9])/stds[9]);
+            tmp.push_back((S12[i]-means[10])/stds[10]);
+            tmp.push_back((S13[i]-means[11])/stds[11]);
+            tmp.push_back((S22[i]-means[12])/stds[12]);
+            tmp.push_back((S23[i]-means[13])/stds[13]);
+            tmp.push_back((S33[i]-means[14])/stds[14]);
+        }
+        else if(MNum==2)
+        {
+            in_s = 12;
+            ot_s = 1;
+            tmp.push_back((G11[i]-means[3])/stds[3]);
+            tmp.push_back((G12[i]-means[4])/stds[4]);
+            tmp.push_back((G13[i]-means[5])/stds[5]);
+            tmp.push_back((G22[i]-means[6])/stds[6]);
+            tmp.push_back((G23[i]-means[7])/stds[7]);
+            tmp.push_back((G33[i]-means[8])/stds[8]);
+            tmp.push_back((S11[i]-means[9])/stds[9]);
+            tmp.push_back((S12[i]-means[10])/stds[10]);
+            tmp.push_back((S13[i]-means[11])/stds[11]);
+            tmp.push_back((S22[i]-means[12])/stds[12]);
+            tmp.push_back((S23[i]-means[13])/stds[13]);
+            tmp.push_back((S33[i]-means[14])/stds[14]);
+        }
+        else if(MNum==3)
+        {
+            in_s = 9;
+            ot_s = 1;
+            tmp.push_back((u_[i]-means[0])/stds[0]);
+            tmp.push_back((v_[i]-means[1])/stds[1]);
+            tmp.push_back((w_[i]-means[2])/stds[2]);
+            tmp.push_back((UUp11[i]-means[15])/stds[15]);
+            tmp.push_back((UUp12[i]-means[16])/stds[16]);
+            tmp.push_back((UUp13[i]-means[17])/stds[17]);
+            tmp.push_back((UUp22[i]-means[18])/stds[18]);
+            tmp.push_back((UUp23[i]-means[19])/stds[19]);
+            tmp.push_back((UUp33[i]-means[20])/stds[20]);
+        }
+        else if(MNum==4)
+        {
+            in_s = 12;
+            ot_s = 1;
+            tmp.push_back((G11[i]-means[3])/stds[3]);
+            tmp.push_back((G12[i]-means[4])/stds[4]);
+            tmp.push_back((G13[i]-means[5])/stds[5]);
+            tmp.push_back((G22[i]-means[6])/stds[6]);
+            tmp.push_back((G23[i]-means[7])/stds[7]);
+            tmp.push_back((G33[i]-means[8])/stds[8]);
+            tmp.push_back((UUp11[i]-means[15])/stds[15]);
+            tmp.push_back((UUp12[i]-means[16])/stds[16]);
+            tmp.push_back((UUp13[i]-means[17])/stds[17]);
+            tmp.push_back((UUp22[i]-means[18])/stds[18]);
+            tmp.push_back((UUp23[i]-means[19])/stds[19]);
+            tmp.push_back((UUp33[i]-means[20])/stds[20]);
+        }
+        else if(MNum==5)
+        {
+            in_s = 21;
+            ot_s = 1;
+            tmp.push_back((u_[i]-means[0])/stds[0]);
+            tmp.push_back((v_[i]-means[1])/stds[1]);
+            tmp.push_back((w_[i]-means[2])/stds[2]);
+            tmp.push_back((G11[i]-means[3])/stds[3]);
+            tmp.push_back((G12[i]-means[4])/stds[4]);
+            tmp.push_back((G13[i]-means[5])/stds[5]);
+            tmp.push_back((G22[i]-means[6])/stds[6]);
+            tmp.push_back((G23[i]-means[7])/stds[7]);
+            tmp.push_back((G33[i]-means[8])/stds[8]);
+            tmp.push_back((S11[i]-means[9])/stds[9]);
+            tmp.push_back((S12[i]-means[10])/stds[10]);
+            tmp.push_back((S13[i]-means[11])/stds[11]);
+            tmp.push_back((S22[i]-means[12])/stds[12]);
+            tmp.push_back((S23[i]-means[13])/stds[13]);
+            tmp.push_back((S33[i]-means[14])/stds[14]);
+            tmp.push_back((UUp11[i]-means[15])/stds[15]);
+            tmp.push_back((UUp12[i]-means[16])/stds[16]);
+            tmp.push_back((UUp13[i]-means[17])/stds[17]);
+            tmp.push_back((UUp22[i]-means[18])/stds[18]);
+            tmp.push_back((UUp23[i]-means[19])/stds[19]);
+            tmp.push_back((UUp33[i]-means[20])/stds[20]);
+        }
 
         in_data.push_back(tmp);
     }
@@ -220,27 +337,32 @@ void nnSGS<BasicTurbulenceModel>::correct()
     //std::cout << "+--- in_data: " << in_data[0] << std::endl;
     const int64_t batchSize = in_data.size();
     //Info << "+--- batch size: " << batchSize << nl;
-    auto feat_ds  = CustomDataset(in_data, in_s).map(torch::data::transforms::Stack<>());
+    auto ds  = CustomDataset(in_data, in_s).map(torch::data::transforms::Stack<>());
     auto dsloader = torch::data::make_data_loader<torch::data::samplers::SequentialSampler>
-                          ( std::move(feat_ds), batchSize);
+                          ( std::move(ds), batchSize);
     //Info << "+--- data loader is ready." << nl;
 
-    model->to(device);
-    //Info << "+--- nn model is loaded to device." << nl;
+    torch::DeviceType device = torch::kCPU; //kCUDA;
+    torch::jit::script::Module torchModel = torch::jit::load("/home/hmarefat/scratch/torchFOAM/JupyterLab/traced_model_M1_103.pt");
+    torchModel.to(device);
+    torchModel.to(torch::kDouble);
+
     for(torch::data::Example<>& batch : *dsloader)
     {
-        auto feat = batch.data.to(device).to(torch::kFloat32);
+        auto feat = batch.data.to(device);
+        c10::IValue ifeat = c10::IValue(feat); 
         //std::cout << "+--- feat: " << feat[0] << std::endl;
-        auto pred = model->forward(feat);
+        auto output = torchModel.forward({ifeat});
+        auto pred = output.toTensor();
         forAll(this->Cs_, i)
         {
-            this->Cs_[i] = pred[i].item<float>() * stds[9] + means[9];
+            this->Cs_[i] = pred[i].item<float>() * stds[21] + means[21];
         }
     }
     
     this->Cs_ = filter_(this->Cs_);
 
-    correctNut(gradU);
+    correctNut(G);
 }
 
 
