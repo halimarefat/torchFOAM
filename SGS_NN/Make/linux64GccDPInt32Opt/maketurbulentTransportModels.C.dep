@@ -1,10 +1,10 @@
 $(OBJECTS_DIR)/maketurbulentTransportModels.C.dep: \
 maketurbulentTransportModels.C \
-nnSGS.H \
+SGS_NN.H \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/turbulentTransportModels.H \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/simpleFilter.H \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/LESeddyViscosity.H \
-nnSGS.C \
+SGS_NN.C \
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/IncompressibleTurbulenceModel.H \
 $(WM_PROJECT_DIR)/src/transportModels/incompressible/transportModel/transportModel.H \
 $(WM_PROJECT_DIR)/src/OpenFOAM/lnInclude/addToRunTimeSelectionTable.H \
@@ -733,11 +733,11 @@ $(WM_PROJECT_DIR)/src/OpenFOAM/lnInclude/triangleI.H \
 $(WM_PROJECT_DIR)/src/OpenFOAM/lnInclude/Barycentric2D.H \
 $(WM_PROJECT_DIR)/src/OpenFOAM/lnInclude/Barycentric2DI.H \
 
-nnSGS.H :
+SGS_NN.H :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/turbulentTransportModels.H :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/simpleFilter.H :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude/LESeddyViscosity.H :
-nnSGS.C :
+SGS_NN.C :
 $(WM_PROJECT_DIR)/src/TurbulenceModels/incompressible/lnInclude/IncompressibleTurbulenceModel.H :
 $(WM_PROJECT_DIR)/src/transportModels/incompressible/transportModel/transportModel.H :
 $(WM_PROJECT_DIR)/src/OpenFOAM/lnInclude/addToRunTimeSelectionTable.H :

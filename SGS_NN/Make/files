@@ -1,3 +1,3 @@
 maketurbulentTransportModels.C
 
-LIB = ./nnSGS
+LIB = ./SGS_NN

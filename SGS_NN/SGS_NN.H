@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::LESModels::nnSGS
+    Foam::LESModels::SGS_NN
 
 Group
     grpLESTurbulence
@@ -30,12 +30,12 @@ Group
 Description
    
 SourceFiles
-    nnSGS.C
+    SGS_NN.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef nnSGS_H
-#define nnSGS_H
+#ifndef SGS_NN_H
+#define SGS_NN_H
 
 #include <torch/torch.h>
 #include <torch/script.h>
@@ -51,19 +51,19 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class nnSGS Declaration
+                       Class SGS_NN Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
-class nnSGS
+class SGS_NN
 :
     public LESeddyViscosity<BasicTurbulenceModel>
 {
     // Private Member Functions
 
         // Disallow default bitwise copy construct and assignment
-        nnSGS(const nnSGS&);
-        void operator=(const nnSGS&);
+        SGS_NN(const SGS_NN&);
+        void operator=(const SGS_NN&);
 
 
 protected:
@@ -90,13 +90,13 @@ public:
     typedef typename BasicTurbulenceModel::transportModel transportModel;
 
     //- Runtime type information
-    TypeName("nnSGS");
+    TypeName("SGS_NN");
 
 
     // Constructors
 
         //- Construct from components
-        nnSGS
+        SGS_NN
         (
             const alphaField& alpha,
             const rhoField& rho,
@@ -110,7 +110,7 @@ public:
 
 
     //- Destructor
-    virtual ~nnSGS()
+    virtual ~SGS_NN()
     {}
 
 
@@ -147,7 +147,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "nnSGS.C"
+    #include "SGS_NN.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -23,8 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "nnSGS.H"
+#include "SGS_NN.H"
 #include "turbulentTransportModels.H"
 #include "simpleFilter.H"
 
-makeLESModel(nnSGS);
+makeLESModel(SGS_NN);

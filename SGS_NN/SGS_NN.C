@@ -25,7 +25,7 @@ License
 
 #include <torch/torch.h>
 #include <torch/script.h>
-#include "nnSGS.H"
+#include "SGS_NN.H"
 #include "fvOptions.H"
 #include "wallDist.H"
 #include "model.H"
@@ -42,7 +42,7 @@ namespace LESModels
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 template<class BasicTurbulenceModel>
-void nnSGS<BasicTurbulenceModel>::correctNut
+void SGS_NN<BasicTurbulenceModel>::correctNut
 (
     const tmp<volTensorField>& gradU
 )
@@ -56,7 +56,7 @@ void nnSGS<BasicTurbulenceModel>::correctNut
 
 
 template<class BasicTurbulenceModel>
-void nnSGS<BasicTurbulenceModel>::correctNut()
+void SGS_NN<BasicTurbulenceModel>::correctNut()
 {
     correctNut(fvc::grad(this->U_));
 }
@@ -65,7 +65,7 @@ void nnSGS<BasicTurbulenceModel>::correctNut()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-nnSGS<BasicTurbulenceModel>::nnSGS
+SGS_NN<BasicTurbulenceModel>::SGS_NN
 (
     const alphaField& alpha,
     const rhoField& rho,
@@ -129,7 +129,7 @@ nnSGS<BasicTurbulenceModel>::nnSGS
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-bool nnSGS<BasicTurbulenceModel>::read()
+bool SGS_NN<BasicTurbulenceModel>::read()
 {
     if (LESeddyViscosity<BasicTurbulenceModel>::read())
     {
@@ -145,7 +145,7 @@ bool nnSGS<BasicTurbulenceModel>::read()
 
 
 template<class BasicTurbulenceModel>
-void nnSGS<BasicTurbulenceModel>::correct()
+void SGS_NN<BasicTurbulenceModel>::correct()
 {
     if (!this->turbulence_)
     {
