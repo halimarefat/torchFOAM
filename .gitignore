@@ -40,3 +40,7 @@ _Dockerfile
 */.ipynb_*
 */*.png
 */lnInclude
+*/datasets
+*/*/*.txt
+*/*/*.npy
+*/fieldData

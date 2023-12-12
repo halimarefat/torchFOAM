@@ -1,4 +1,5 @@
 #include <torch/torch.h>
+#include <torch/script.h>
 #include <iostream>
 #include <memory>
 #include <fstream>
@@ -17,6 +18,8 @@ int main()
             << TORCH_VERSION_MAJOR << "."
             << TORCH_VERSION_MINOR << "."
             << TORCH_VERSION_PATCH << std::endl;
+  std::cout << "+-- File path    : " << options.file_path << "\n";
+  std::cout << "+-- MNum         : " << options.MNum      << "\n";
 
   if (torch::cuda::is_available())
     options.device = torch::kCUDA;
@@ -66,10 +69,9 @@ int main()
     }
   }
 
-
   ANNModel model(options.in_s, options.ot_s, options.hl_n, options.hd_s);
-  const std::string bestPATH = "dSHR_BBPF_GUp_150_160__norm.pt";
-  const std::string logPATH = "./dSHR_BBPF_GUp_150_160__norm.log";
+  const std::string bestPATH = "./best_model_" + options.file_name_without_extension +".pt";
+  const std::string logPATH = "./log_" + options.file_name_without_extension + ".log";
 
   if(options.trainMode)
   {
@@ -78,26 +80,28 @@ int main()
     printf("+-- model is loaded to the device and trainig is starting!\n");
 
     torch::optim::Adam optimizer(model->parameters(), torch::optim::AdamOptions(1e-3));
+    torch::optim::StepLR scheduler(optimizer, /*step_size=*/ 10, /*gamma=*/ 0.5);
+    torch::nn::MSELoss loss;
 
     std::ofstream logFile(logPATH);
     assert(logFile.is_open());
     logFile << "epoch\tLoss_train\tLoss_val\n";
 
     float best_loss = std::numeric_limits<float>::max();
+    int early_stop_counter = 0;
 
     for(int64_t epoch=1; epoch <= options.numbOfEpochs; epoch++)
     {
-      int64_t batch_index = 0;
       float Loss_train= 0, Loss_val= 0;
-      //float Acc_train= 0 , Acc_val= 0;
-
-      for(torch::data::Example<>& batch : *train_data_loader)
+      int64_t batch_index = 0;
+      
+      model->train();
+      for(const auto& batch : *train_data_loader)
       {
-        model->train();
         auto train_feat = batch.data.to(options.device);
         auto train_labs = batch.target.to(options.device);
         auto train_pred = model->forward(train_feat);
-        auto train_loss = torch::nn::functional::mse_loss(train_pred, train_labs);
+        auto train_loss = loss(train_pred, train_labs);
         assert(!std::isnan(train_loss.template item<float>()));
         //auto train_acc = train_pred.argmax(1).eq(train_labs).sum();
 
@@ -113,14 +117,16 @@ int main()
 
       Loss_train = Loss_train / options.train_batches_per_epoch;
 
+
       batch_index = 0;
-      for(torch::data::Example<>& batch : *val_data_loader)
+      
+      model->eval();
+      for(const auto& batch : *val_data_loader)
       {
-        model->eval();
         auto val_feat = batch.data.to(options.device);
         auto val_labs = batch.target.to(options.device);
         auto val_pred = model->forward(val_feat);
-        auto val_loss = torch::nn::functional::mse_loss(val_pred, val_labs);
+        auto val_loss = loss(val_pred, val_labs);
         assert(!std::isnan(val_loss.template item<float>()));
         //auto val_acc = val_pred.argmax(1).eq(val_labs).sum();
 
@@ -138,11 +144,24 @@ int main()
       
       logFile << epoch << "\t" << Loss_train << "\t" << Loss_val << "\n";
       logFile.flush();
+
+      scheduler.step();
+
       if(Loss_val < best_loss)
       {
-        torch::save(model, bestPATH);
-        best_loss = Loss_val;
-      }    
+          torch::save(model, bestPATH);
+          best_loss = Loss_val;
+          early_stop_counter = 0;  
+      }
+      else
+      {
+          early_stop_counter++;
+          if (early_stop_counter >= options.patience)
+          {
+              std::printf("\nEarly stopping at epoch %ld due to no improvement in validation loss.\n", epoch);
+              break;
+          }
+      } 
     }
   
     logFile.close();
@@ -150,19 +169,21 @@ int main()
   }
   else
   {
-    torch::load(model, bestPATH);
-    model->to(options.device);  
-    model->to(torch::kDouble); 
+    torch::jit::script::Module modelpred = torch::jit::load("/home/hmarefat/scratch/torchFOAM/JupyterLab/traced_model_M2_103.pt");
+    modelpred.to(options.device);
+    modelpred.to(torch::kDouble);
     printf("+-- The best model is loaded to the device!\n");
     
     std::ofstream fout("compare_training.dat");
     int count = 0;
     for(torch::data::Example<>& batch : *train_data_loader)
     {
-      model->eval();
-      auto feat = batch.data.to(options.device); 
+      modelpred.eval();
+      auto feat = batch.data.to(options.device);
+      c10::IValue input = c10::IValue(feat); 
       auto labs = batch.target.to(options.device); 
-      auto pred = model->forward(feat);
+      auto output = modelpred.forward({input});
+      auto pred = output.toTensor();
     
       for(int i = 0; i < pred.sizes()[0]; i++)
       {
