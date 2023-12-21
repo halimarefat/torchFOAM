@@ -62,10 +62,10 @@ Delta       cubeRootVol; //vanDriest;
 startF    latestTime; //startTime; //
 DT        0.01;
 TBEG      0;
-TMAX      300; 
+TMAX      330; 
 MICRO     250;
 wrC       adjustableRunTime; //timeStep;
-WI        50;
+WI        30;
 maxCor    1.0;
 
 /* toposet information */
@@ -86,9 +86,9 @@ number of partitions in z direction = Sz
 
 */
 
-nDomains 256;
+nDomains 16;
 Sx       16;
-Sy       4;
-Sz       4;
+Sy       1;
+Sz       1;
 
 method   simple;

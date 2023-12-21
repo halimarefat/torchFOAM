@@ -3,10 +3,10 @@
 #SBATCH --account=def-alamj
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
-#SBATCH --ntasks-per-node=32
-#SBATCH --time=0-2:00:00
-#SBATCH --mem-per-cpu=800
-#SBATCH --job-name=nnCase
+#SBATCH --ntasks-per-node=48
+#SBATCH --time=0-15:00:00
+#SBATCH --mem-per-cpu=1G
+#SBATCH --job-name=NN_M2_103
 
 module restore torchfoamenv
 blockMesh

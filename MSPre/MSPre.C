@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
     fileName outPath = mesh.time().path()/"postProcessing";
     mkDir(outPath);
 	  autoPtr<OFstream> outPtr;
-    outPtr.reset(new OFstream(outPath/"fieldData.dat"));
+    outPtr.reset(new OFstream(outPath/"fieldData_rest.dat"));
 
     outPtr() << "t\t" 
              << "Ux\t"   << "Uy\t"   << "Uz\t"
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
         
         for (label cellI = 0; cellI < mesh.C().size(); cellI++)
         {          
-          if(cellI % 20 == 0)
+          if(cellI % 21 == 0)
           {
             outPtr()<< runTime.timeName() << "\t"
                     //<< mesh.C()[cellI][0] << "\t" << mesh.C()[cellI][1] << "\t" << mesh.C()[cellI][2] << "\t" 

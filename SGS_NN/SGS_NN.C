@@ -236,8 +236,8 @@ void SGS_NN<BasicTurbulenceModel>::correct()
 
     int64_t in_s = -3999;
     int64_t ot_s = -3999;
-    int64_t MNum = 1;
-
+    int64_t MNum = 2;
+Info << "----**** P1" << nl;
     std::vector<std::vector<double>> in_data;
     forAll(u_, i)
     {
@@ -335,18 +335,21 @@ void SGS_NN<BasicTurbulenceModel>::correct()
     }
     //std::cout << u_[0] << v_[0] << w_[0] << S11[0] << S12[0] << S13[0] << S22[0] << S23[0] << S33[0] << std::endl;
     //std::cout << "+--- in_data: " << in_data[0] << std::endl;
+    Info << "----**** P2" << nl;
     const int64_t batchSize = in_data.size();
-    //Info << "+--- batch size: " << batchSize << nl;
+    Info << "----**** P3" << nl;
+    Info << "+--- batch size: " << batchSize << nl;
     auto ds  = CustomDataset(in_data, in_s).map(torch::data::transforms::Stack<>());
     auto dsloader = torch::data::make_data_loader<torch::data::samplers::SequentialSampler>
                           ( std::move(ds), batchSize);
     //Info << "+--- data loader is ready." << nl;
 
-    torch::DeviceType device = torch::kCPU; //kCUDA;
-    torch::jit::script::Module torchModel = torch::jit::load("/home/hmarefat/scratch/torchFOAM/JupyterLab/traced_model_M1_103.pt");
+    torch::DeviceType device = torch::kCUDA;
+    torch::jit::script::Module torchModel = torch::jit::load("/home/hmarefat/scratch/torchFOAM/JupyterLab/traced_model_M2_103.pt");
     torchModel.to(device);
     torchModel.to(torch::kDouble);
-
+    Info << "+--- torch model is loaded." << nl;
+    Info << "----**** P4" << nl;
     for(torch::data::Example<>& batch : *dsloader)
     {
         auto feat = batch.data.to(device);
