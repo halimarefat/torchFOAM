@@ -236,7 +236,7 @@ void SGS_NN<BasicTurbulenceModel>::correct()
 
     int64_t in_s = -3999;
     int64_t ot_s = -3999;
-    int64_t MNum = 2;
+    int64_t MNum = 3;
 Info << "----**** P1" << nl;
     std::vector<std::vector<double>> in_data;
     forAll(u_, i)
@@ -345,7 +345,7 @@ Info << "----**** P1" << nl;
     //Info << "+--- data loader is ready." << nl;
 
     torch::DeviceType device = torch::kCUDA;
-    torch::jit::script::Module torchModel = torch::jit::load("/home/hmarefat/scratch/torchFOAM/JupyterLab/traced_model_M2_103.pt");
+    torch::jit::script::Module torchModel = torch::jit::load("/home/hmarefat/scratch/torchFOAM/JupyterLab/traced_model_M3_103.pt");
     torchModel.to(device);
     torchModel.to(torch::kDouble);
     Info << "+--- torch model is loaded." << nl;

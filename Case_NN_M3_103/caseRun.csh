@@ -6,7 +6,7 @@
 #SBATCH --ntasks-per-node=48
 #SBATCH --time=0-15:00:00
 #SBATCH --mem-per-cpu=1G
-#SBATCH --job-name=NN_M2_103
+#SBATCH --job-name=NN_M4_103
 
 module restore torchfoamenv
 blockMesh
