@@ -157,7 +157,43 @@ void SGS_NN<BasicTurbulenceModel>::correct()
     
     //int num_inputs = 9;
     //int num_outputs = 1;
+    Foam::IOdictionary nnProperties
+    (
+        Foam::IOobject
+        (
+            "nnProperties",
+            Foam::fileName(this->runTime_.constant()),
+            this->mesh_,
+            Foam::IOobject::MUST_READ,
+            Foam::IOobject::NO_WRITE
+        )
+    );
 
+    int64_t MNum = nnProperties.lookup("MNum");
+    
+    const int ARRAY_SIZE = 22;
+    std::vector<float> means(ARRAY_SIZE);
+    std::vector<float> stds(ARRAY_SIZE);
+
+    std::vector<std::string> keys = {"Ux","Uy","Uz",
+                                        "G1","G2","G3","G4","G5","G6",
+                                        "S1","S2","S3","S4","S5","S6",
+                                        "UUp1","UUp2","UUp3","UUp4","UUp5","UUp6", 
+                                        "Cs"};
+    // Read values
+    for (int i = 0; i < ARRAY_SIZE; ++i)
+    {
+        means[i] = Foam::readScalar(nnProperties.subDict("means").lookup(Foam::word(keys[i])));
+        stds[i] = Foam::readScalar(nnProperties.subDict("stds").lookup(Foam::word(keys[i])));
+    }
+
+    Info << "----**** means 0: " << means[0] << nl;
+    Info << "----**** means 1: " << means[1] << nl;
+
+    Info << "----**** stds 0: " << stds[0] << nl;
+    Info << "----**** stds 1: " << stds[1] << nl;
+
+/*
     float means[22] = { 1.544171594630381201e-05,    // "Ux"
                         -2.560523192857740358e-05,   // "Uy"
                         -3.247401102078045364e-04,   // "Uz"
@@ -202,7 +238,7 @@ void SGS_NN<BasicTurbulenceModel>::correct()
                         1.243064528220244776e-04,    // "UUp4"
                         1.072069298451816576e-03,    // "UUp5"
                         7.838572223963288788e-02};   // "UUp6"
-
+*/
     volScalarField u_ = this->U_.component(vector::X);
     volScalarField v_ = this->U_.component(vector::Y);
     volScalarField w_ = this->U_.component(vector::Z);
@@ -236,7 +272,7 @@ void SGS_NN<BasicTurbulenceModel>::correct()
 
     int64_t in_s = -3999;
     int64_t ot_s = -3999;
-    int64_t MNum = 3;
+    
 Info << "----**** P1" << nl;
     std::vector<std::vector<double>> in_data;
     forAll(u_, i)
@@ -345,7 +381,7 @@ Info << "----**** P1" << nl;
     //Info << "+--- data loader is ready." << nl;
 
     torch::DeviceType device = torch::kCUDA;
-    torch::jit::script::Module torchModel = torch::jit::load("/home/hmarefat/scratch/torchFOAM/JupyterLab/traced_model_M3_103.pt");
+    torch::jit::script::Module torchModel = torch::jit::load("/home/hmarefat/scratch/torchFOAM/JupyterLab/traced_model_M4_503.pt");
     torchModel.to(device);
     torchModel.to(torch::kDouble);
     Info << "+--- torch model is loaded." << nl;
