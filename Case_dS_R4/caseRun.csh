@@ -9,8 +9,8 @@
 
 module restore torchfoamenv
 blockMesh
-topoSet
-decomposePar
+topoSet -time 0
+decomposePar -time 0
 srun /home/hmarefat/projects/def-alamj/shared/bin/v6/atmosphericLES -parallel > casec_log.out
 reconstructPar -latestTime
 rm -r process*

@@ -8,6 +8,9 @@
 #SBATCH --job-name=Case_dS
 
 module restore torchfoamenv
-decomposePar -time 320
+blockMesh
+topoSet -time 0
+decomposePar -time 0
 srun /home/hmarefat/projects/def-alamj/shared/bin/v6/atmosphericLES -parallel > casec_log.out
-reconstructPar 
+reconstructPar -latestTime
+rm -r process*

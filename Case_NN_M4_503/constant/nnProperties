@@ -15,7 +15,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-MNum    4;
+MNum    3;
+device  "cuda"; // "cpu" or "cuda"
+torchModelPath "/home/hmarefat/scratch/torchFOAM/JupyterLab/traced_model_M3_503.pt";
 
 means
 {
@@ -67,5 +69,4 @@ stds
     UUp5    4.184657229618984897e-03;
     UUp6    4.462723992546924201e-02;
     Cs      8.316997127526029598e-02;
-
 }

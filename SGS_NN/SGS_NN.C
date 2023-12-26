@@ -32,6 +32,7 @@ License
 #include "CustomDataset.H"
 #include <vector>
 #include <memory>
+#include "string"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -169,8 +170,8 @@ void SGS_NN<BasicTurbulenceModel>::correct()
         )
     );
 
-    int64_t MNum = nnProperties.lookup("MNum");
-    
+    int64_t MNum = Foam::readLabel(nnProperties.lookup("MNum"));
+
     const int ARRAY_SIZE = 22;
     std::vector<float> means(ARRAY_SIZE);
     std::vector<float> stds(ARRAY_SIZE);
@@ -380,9 +381,25 @@ Info << "----**** P1" << nl;
                           ( std::move(ds), batchSize);
     //Info << "+--- data loader is ready." << nl;
 
-    torch::DeviceType device = torch::kCUDA;
-    torch::jit::script::Module torchModel = torch::jit::load("/home/hmarefat/scratch/torchFOAM/JupyterLab/traced_model_M4_503.pt");
-    torchModel.to(device);
+    std::string device = Foam::word(nnProperties.lookup("device"));
+    Foam::fileName torchModelPath(nnProperties.lookup("torchModelPath"));
+    //std::string torchModelPath = Foam::word(nnProperties.lookup("torchModelPath"));
+
+    torch::DeviceType deviceType;
+    if (device == "cuda") 
+    {
+        deviceType = torch::kCUDA;
+        Info << "+--- device is: " << device << nl;
+    } 
+    else if (device == "cpu")
+    {
+        deviceType = torch::kCPU;
+        Info << "+--- device is: " << device << nl; 
+    }
+    //string torchModelPath = "/home/hmarefat/scratch/torchFOAM/JupyterLab/traced_model_M4_503.pt";
+    
+    torch::jit::script::Module torchModel = torch::jit::load(torchModelPath.c_str());
+    torchModel.to(deviceType);
     torchModel.to(torch::kDouble);
     Info << "+--- torch model is loaded." << nl;
     Info << "----**** P4" << nl;
