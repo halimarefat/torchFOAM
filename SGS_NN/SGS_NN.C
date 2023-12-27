@@ -155,9 +155,6 @@ void SGS_NN<BasicTurbulenceModel>::correct()
 
     LESeddyViscosity<BasicTurbulenceModel>::correct();
 
-    
-    //int num_inputs = 9;
-    //int num_outputs = 1;
     Foam::IOdictionary nnProperties
     (
         Foam::IOobject
@@ -194,58 +191,10 @@ void SGS_NN<BasicTurbulenceModel>::correct()
     Info << "----**** stds 0: " << stds[0] << nl;
     Info << "----**** stds 1: " << stds[1] << nl;
 
-/*
-    float means[22] = { 1.544171594630381201e-05,    // "Ux"
-                        -2.560523192857740358e-05,   // "Uy"
-                        -3.247401102078045364e-04,   // "Uz"
-                        7.804831747328077327e-06,    // "G1"
-                        9.082373092743025638e-06,    // "G2"
-                        -2.826031580718503457e-04,   // "G3"
-                        2.956847138544458752e-04,    // "G4"
-                        1.442436366413626285e-04,    // "G5"
-                        -3.247401102078045364e-04,   // "G6"
-                        -1.373993161708686375e-04,   // "S1"
-                        -1.412843425373607918e-04,   // "S2"
-                        2.956847138544458752e-04,    // "S3"
-                        -2.418319111180643510e-06,   // "S4"
-                        9.525723602570234586e-05,    // "S5"
-                        4.281951411933750009e-04,    // "S6"
-                        7.896384510998569087e-06,    // "UUp1"
-                        -7.242505366152104133e-06,   // "UUp2"
-                        1.604121755457488035e-04,    // "UUp3"
-                        5.625850094291776822e-06,    // "UUp4"
-                        1.612462199947330230e-04,    // "UUp5"
-                        3.666401753462222857e-03};   // "UUp6"
-
-
-    float stds[22] = {  1.515229159046805642e-02,    // "Ux"
-                        1.602341504878677242e-02,    // "Uy"
-                        8.615968193033807232e-02,    // "Uz"
-                        5.548788365730993738e-02,    // "G1"
-                        4.599441015626788004e-02,    // "G2"
-                        1.860230653121577593e-01,    // "G3"
-                        6.097452906448685289e-02,    // "G4"
-                        6.929750977780890775e-02,    // "G5"
-                        8.615968193033807232e-02,    // "G6"
-                        8.619717830466355757e-02,    // "S1"
-                        8.868153453850928514e-02,    // "S2"
-                        6.097452906448685289e-02,    // "S3"
-                        4.297573553118718553e-02,    // "S4"
-                        5.630207025453635994e-02,    // "S5"
-                        3.190411418073245062e-03,    // "S6"
-                        7.276168680109836679e-04,    // "UUp1"
-                        7.306797185912870893e-04,    // "UUp2"
-                        1.044051203870081457e-03,    // "UUp3"
-                        1.243064528220244776e-04,    // "UUp4"
-                        1.072069298451816576e-03,    // "UUp5"
-                        7.838572223963288788e-02};   // "UUp6"
-*/
     volScalarField u_ = this->U_.component(vector::X);
     volScalarField v_ = this->U_.component(vector::Y);
     volScalarField w_ = this->U_.component(vector::Z);
 
-    //tmp<volTensorField> tgradU(fvc::grad(this->U_));
-    //const volTensorField& gradU = tgradU();
     volTensorField G = fvc::grad(this->U_);
     volScalarField G11 = G.component(tensor::XX);
     volScalarField G12 = G.component(tensor::XY);
@@ -274,7 +223,6 @@ void SGS_NN<BasicTurbulenceModel>::correct()
     int64_t in_s = -3999;
     int64_t ot_s = -3999;
     
-Info << "----**** P1" << nl;
     std::vector<std::vector<double>> in_data;
     forAll(u_, i)
     {
@@ -370,11 +318,9 @@ Info << "----**** P1" << nl;
 
         in_data.push_back(tmp);
     }
-    //std::cout << u_[0] << v_[0] << w_[0] << S11[0] << S12[0] << S13[0] << S22[0] << S23[0] << S33[0] << std::endl;
+    
     //std::cout << "+--- in_data: " << in_data[0] << std::endl;
-    Info << "----**** P2" << nl;
     const int64_t batchSize = in_data.size();
-    Info << "----**** P3" << nl;
     Info << "+--- batch size: " << batchSize << nl;
     auto ds  = CustomDataset(in_data, in_s).map(torch::data::transforms::Stack<>());
     auto dsloader = torch::data::make_data_loader<torch::data::samplers::SequentialSampler>
@@ -383,7 +329,6 @@ Info << "----**** P1" << nl;
 
     std::string device = Foam::word(nnProperties.lookup("device"));
     Foam::fileName torchModelPath(nnProperties.lookup("torchModelPath"));
-    //std::string torchModelPath = Foam::word(nnProperties.lookup("torchModelPath"));
 
     torch::DeviceType deviceType;
     if (device == "cuda") 
@@ -396,13 +341,11 @@ Info << "----**** P1" << nl;
         deviceType = torch::kCPU;
         Info << "+--- device is: " << device << nl; 
     }
-    //string torchModelPath = "/home/hmarefat/scratch/torchFOAM/JupyterLab/traced_model_M4_503.pt";
     
     torch::jit::script::Module torchModel = torch::jit::load(torchModelPath.c_str());
     torchModel.to(deviceType);
     torchModel.to(torch::kDouble);
     Info << "+--- torch model is loaded." << nl;
-    Info << "----**** P4" << nl;
     for(torch::data::Example<>& batch : *dsloader)
     {
         auto feat = batch.data.to(device);

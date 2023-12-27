@@ -3,10 +3,13 @@
 #SBATCH --account=def-alamj
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
-#SBATCH --ntasks-per-node=16
-#SBATCH --time=0-12:00:00
-#SBATCH --mem-per-cpu=3G
+#SBATCH --ntasks-per-node=32
+#SBATCH --time=0-23:00:00
+#SBATCH --mem-per-cpu=6G
 #SBATCH --job-name=nnCase
 
 module restore torchfoamenv
-srun /home/hmarefat/projects/def-alamj/shared/bin/v6/atmosphericLES -parallel > casec_log_1.out
+blockMesh
+topoSet -time 0
+decomposePar -time 0
+srun /home/hmarefat/projects/def-alamj/shared/bin/v6/atmosphericLES -parallel > casec_log.out
