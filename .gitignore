@@ -45,3 +45,5 @@ _Dockerfile
 */*/*.npy
 */fieldData
 */fieldData_unseen
+Analysis/**/*.png
+**/*.png

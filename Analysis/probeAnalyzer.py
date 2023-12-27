@@ -63,7 +63,7 @@ if __name__ == "__main__":
         probes_R103 = np.array(probe_data_R103)
         probes_R503 = np.array(probe_data_R503)
         probes_R104 = np.array(probe_data_R104)
-        probe_index = 1
+        probe_index = 0
         dir_index = 1
         NormF_R103, e_R103 = energySpectrum(probes_R103[:, probe_index, dir_index])
         NormF_R503, e_R503 = energySpectrum(probes_R503[:, probe_index, dir_index])
