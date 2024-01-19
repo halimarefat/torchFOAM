@@ -28,6 +28,7 @@ nnTraining/nnTraining_*
 nnTraining/*.pt
 nnTraining/*.log
 nnTraining/*.dat
+nnTraining/*/*.png
 smagCase*
 _Dockerfile
 */Make/lin*
@@ -46,4 +47,6 @@ _Dockerfile
 */fieldData
 */fieldData_unseen
 Analysis/**/*.png
-**/*.png
+*/*/*.png
+*/*.json
+*.json
