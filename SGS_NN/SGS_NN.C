@@ -48,7 +48,7 @@ void SGS_NN<BasicTurbulenceModel>::correctNut
     const tmp<volTensorField>& gradU
 )
 {
-    this->nut_ = max(Cs_*sqr(this->delta())*mag(dev(symm(gradU))),-1.0*this->nu());
+    this->nut_ = max(this->Cs_*sqr(this->delta())*mag(dev(symm(gradU))),-1.0*this->nu());
     this->nut_.correctBoundaryConditions();
     fv::options::New(this->mesh_).correct(this->nut_);
 
@@ -348,7 +348,7 @@ void SGS_NN<BasicTurbulenceModel>::correct()
     Info << "+--- torch model is loaded." << nl;
     for(torch::data::Example<>& batch : *dsloader)
     {
-        auto feat = batch.data.to(device);
+        auto feat = batch.data.to(torch::kDouble).to(device);
         c10::IValue ifeat = c10::IValue(feat); 
         //std::cout << "+--- feat: " << feat[0] << std::endl;
         auto output = torchModel.forward({ifeat});
