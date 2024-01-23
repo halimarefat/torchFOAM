@@ -65,7 +65,7 @@ TBEG      0;
 TMAX      300; 
 MICRO     250;
 wrC       adjustableRunTime; //timeStep;
-WI        150;
+WI        50;
 maxCor    1.0;
 
 /* toposet information */
@@ -86,8 +86,8 @@ number of partitions in z direction = Sz
 
 */
 
-nDomains 32;
-Sx       16;
+nDomains 48;
+Sx       24;
 Sy       2;
 Sz       1;
 
