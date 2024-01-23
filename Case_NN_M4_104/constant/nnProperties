@@ -16,7 +16,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 MNum    4;
-device  "cuda"; // "cpu" or "cuda"
+device  "cpu"; // "cpu" or "cuda"
 torchModelPath "/home/hmarefat/scratch/torchFOAM/JupyterLab/traced_model_M4_104.pt";
 
 means

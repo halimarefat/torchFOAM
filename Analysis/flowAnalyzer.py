@@ -20,10 +20,9 @@ def extract_coefficients(openfoam_output):
 
     return extracted_values
 
-# Example usage
 if __name__ == "__main__":
-    # Replace with the path to your OpenFOAM output file
-    file_path = '/home/hmarefat/scratch/torchFOAM/Case_dS/casec_log.out'
+    
+    file_path = '/home/hmarefat/scratch/torchFOAM/Case_NN_M4_503/casec_log.out'
 
     with open(file_path, 'r') as file:
         openfoam_output = file.read()
@@ -48,5 +47,5 @@ if __name__ == "__main__":
     #plt.grid(True)
     #plt.plot(coefficients['Cl'], label='Cd Values', marker='o')  # Plot individual Cd values with markers
     #plt.axhline(y=np.mean(coefficients['Cl']), color='r', linestyle='-', label=f'Mean Cd = {np.mean(coefficients['Cl']):.2f}')  # Mean line
-    plt.savefig('test.png')
+    plt.savefig('Case_NN_M4_503_Cd.png')
 

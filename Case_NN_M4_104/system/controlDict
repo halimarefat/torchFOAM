@@ -54,13 +54,12 @@ maxCo            $maxCor;
 
 functions
 {
-    /*
     postLESFunc
     {
         functionObjectLibs  ("libutilityFunctionObjects.so");
         type                coded;
         redirectType        postLESFunc;
-        writeControl        outputTime; //timeStep; //
+        writeControl        timeStep; //outputTime; //
         enabled             true;
 
         codeInclude
@@ -75,6 +74,7 @@ functions
             #include <vector>
             #include <numeric>
             #include <map>
+            #include <set>
         #};
         
         codeOptions
@@ -91,20 +91,41 @@ functions
             volTensorField gradU = fvc::grad(U);
             volSymmTensorField S(symm(gradU));
             const Foam::incompressible::turbulenceModel&  turbulence = mesh().thisDb().lookupObject<Foam::incompressible::turbulenceModel>("turbulenceProperties");            
-            const tmp<volScalarField> tmp_nu = turbulence.nu();
-            const volScalarField& nu_sgs = tmp_nu;
-            //const tmp<volScalarField> tmp_k = turbulence.k();
-            //const volScalarField& k_sgs = tmp_k;
+            const tmp<volScalarField> tmp_k = turbulence.k();
+            const volScalarField& k_sgs = tmp_k;
             const tmp<volScalarField> tmp_eps = turbulence.epsilon();
             const volScalarField& eps = tmp_eps;            
-            volScalarField enstr = 0.5*magSqr(fvc::curl(U));
-            volVectorField omega = fvc::curl(U);
-        
+            //volScalarField enstr  = 0.5*magSqr(fvc::curl(U));
+            volVectorField omega  = fvc::curl(U);
+            volScalarField omega2 = omega&omega;
+            
             static autoPtr<volScalarField> skewns;
             static autoPtr<volScalarField> vortSt;
-            static autoPtr<volScalarField> strain;
-            if(!skewns.valid() && !vortSt.valid() && !strain.valid())
+            //static autoPtr<volScalarField> strain;
+            static autoPtr<volScalarField> Qg_;
+            static autoPtr<volScalarField> Rg_;
+            static autoPtr<volScalarField> Qs_;
+            static autoPtr<volScalarField> Rs_;
+            static autoPtr<volScalarField> enstr;
+            
+            if(!skewns.valid() && !vortSt.valid()) // && !strain.valid())
             {
+                enstr.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "enstrophy",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        0.5*magSqr(fvc::curl(U)) 
+                    )
+                );
+
                 skewns.set
                 (
                     new volScalarField
@@ -117,7 +138,7 @@ functions
                             IOobject::NO_READ,
                             IOobject::AUTO_WRITE
                         ) ,
-                        -1.0/3.0*(S && (S & S))
+                        -1.0/3.0*(S && (S & S)) //-6*pow(15, 0.5)*(omega & (omega & S)) / (7*pow(omega2, 1.5))    
                     )
                 );
 
@@ -136,7 +157,8 @@ functions
                         omega & (omega & S)
                     )
                 );
-
+                
+                /*
                 strain.set
                 (
                     new volScalarField
@@ -152,26 +174,107 @@ functions
                         (S & S) && S
                     )
                 );
+                */
+
+                Qg_.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "Qg",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        0.5*sqr(tr(gradU)) - tr(gradU&gradU)
+                    )
+                );
+
+                Rg_.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "Rg",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        -1.0/3 *( (S&&(S&S)) + (3.0/4.0 * (omega*omega)&&S))
+                    )
+                );
+
+                Qs_.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "Qs",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        -0.5*tr(S & S) 
+                    )
+                );
+
+                Rs_.set
+                (
+                    new volScalarField
+                    (
+                        Foam::IOobject
+                        (
+                            "Rs",
+                            mesh().time().timeName(),
+                            U.mesh(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE
+                        ) ,
+                        -1.0/3.0*(S && (S & S))
+                    )
+                );
+
+                
             }
             volScalarField& skewness = skewns();
             volScalarField& vortexStretching = vortSt();
-            volScalarField& strainSeflAmp = strain();
-
+            //volScalarField& strainSeflAmp = strain();
+            volScalarField& Qg = Qg_();
+            volScalarField& Rg = Rg_();
+            volScalarField& Qs = Qs_();
+            volScalarField& Rs = Rs_();
+            volScalarField& enstrophy = enstr();
+            
             if(mesh().time().writeTime())
             {
-                nu_sgs.write();
-                //k_sgs.write();
+                k_sgs.write();
                 eps.write();
                 skewness.checkIn();
                 skewness.write();
                 vortexStretching.checkIn();
                 vortexStretching.write();
-                strainSeflAmp.checkIn();
-                strainSeflAmp.write();
+                //strainSeflAmp.checkIn();
+                //strainSeflAmp.write();
+                Qg.checkIn();
+                Qg.write();
+                Rg.checkIn();
+                Rg.write();
+                Qs.checkIn();
+                Qs.write();
+                Rs.checkIn();
+                Rs.write();
+                enstrophy.checkIn();
+                enstrophy.write();
             }
+
         #};
     }
-    */
 
     fieldAverage1
     {
