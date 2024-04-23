@@ -1,0 +1,95 @@
+/* ********************************************************************
+ *
+ * Configuration file for ATMOSPHERIC-LES code
+   Author: Dr. Jahrul Alam, Copyright [C] Alam research group.
+   This atmospheric solver has been written at the top of OpenFOAM.
+
+   Please do not modify or remove this header.
+ *
+ **********************************************************************/
+
+// Scale used for mesh generation
+Scale 1;
+
+/*  The box (xMin, yMin, zMin) (xMax, yMax, zMax) */
+
+xMin -6;
+
+xMax 10;
+
+yMin -4;
+
+yMax  4; 
+
+zMin -4;
+
+zMax  4;
+
+/* Using two boxes, 
+   bottom (xMin, yMin, zMin) (xMax, yMax, zHalf)
+   top    (xMin, yMin, zHalf) (xMax, yMax, zMax)
+*/
+
+Nx 256; //128;
+
+Ny 128; //64; 
+
+Nz 128; //64;
+
+zStrch 1;
+
+// Momentum source
+Ug    1.0;
+Vg    0.0;
+
+// terrain force
+xFric     3.16228e5;
+yFric     3.16228e5;
+zFric     3.16228e5;
+
+xForm     1.77828e4; 
+yForm     1.77828e4; 
+zForm     1.77828e4; 
+
+// Turbulence
+
+SIMTYPE     laminar;
+LESModel    SGS_dS;
+Delta       cubeRootVol; //vanDriest;
+
+// Run control
+
+startF    latestTime; //startTime; //
+DT        0.01;
+TBEG      0;
+TMAX      100; 
+MICRO     250;
+wrC       adjustableRunTime; //timeStep; //
+WI        10;
+maxCor    1.0;
+
+/* toposet information */
+source      sphereToCell; //boxToCell; //cylinderToCell
+cx          0;
+cy          0;
+cz          0;
+RADIUS      0.5;
+
+name        canopy;
+
+/* domain decomposition
+
+nDomains = Sx * Sy * Sz
+number of partitions in x direction = Sx
+number of partitions in y direction = Sy
+number of partitions in z direction = Sz
+
+*/
+
+nDomains 256;
+Sx       16;
+Sy       4;
+Sz       4;
+
+method   simple;
+
