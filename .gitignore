@@ -50,3 +50,5 @@ Analysis/**/*.png
 */*/*.png
 */*.json
 *.json
+*/_*
+*/*/_*
