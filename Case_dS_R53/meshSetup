@@ -59,13 +59,13 @@ Delta       cubeRootVol; //vanDriest;
 
 // Run control
 
-startF    latestTime; //startTime; //
+startF    startTime; //latestTime; //
 DT        0.01;
-TBEG      0;
-TMAX      1000; 
+TBEG      300;
+TMAX      310; 
 MICRO     250;
-wrC       adjustableRunTime; //timeStep; //
-WI        500;
+wrC       timeStep; //adjustableRunTime; //
+WI        25;
 maxCor    1.0;
 
 /* toposet information */
