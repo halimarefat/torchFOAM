@@ -121,11 +121,16 @@ int main(int argc, char* argv[])
       
         
         for (label cellI = 0; cellI < mesh.C().size(); cellI++)
-        {          
-          if(cellI % 21 == 0)
-          {
+        {
+          const vector& cellCenter = mesh.C()[cellI];
+          if (cellCenter.x() > -1.0 && cellCenter.x() < 7.0 &&
+              cellCenter.y() > -1.0 && cellCenter.y() < 1.0 &&
+              cellCenter.z() > -1.0 && cellCenter.z() < 1.0)
+          {          
+          //if(cellI % 1 == 0)
+          //{
             outPtr()<< runTime.timeName() << "\t"
-                    //<< mesh.C()[cellI][0] << "\t" << mesh.C()[cellI][1] << "\t" << mesh.C()[cellI][2] << "\t" 
+                    << mesh.C()[cellI][0] << "\t" << mesh.C()[cellI][1] << "\t" << mesh.C()[cellI][2] << "\t" 
                     << U  [cellI][0] << "\t" << U  [cellI][1] << "\t" << U  [cellI][2] << "\t"
                     << G  [cellI][0] << "\t" << G  [cellI][1] << "\t" << G  [cellI][2] << "\t"
                     << G  [cellI][3] << "\t" << G  [cellI][4] << "\t" << G  [cellI][5] << "\t"
