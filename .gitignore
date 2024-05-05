@@ -34,7 +34,6 @@ _Dockerfile
 */Make/lin*
 */Archive
 */*.out
-*/*.pt
 */*.log
 */*.txt
 */*.dat
