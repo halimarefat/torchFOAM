@@ -47,7 +47,6 @@ _Dockerfile
 */fieldData_unseen
 Analysis/**/*.png
 */*/*.png
-*/*.json
 *.json
 */_*
 */*/_*
