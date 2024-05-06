@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader, Dataset
 sys_epsilon = sys.float_info.epsilon
 
 class MyDataset(Dataset):
+    
     def __init__(self, dataframe):
         self.data = dataframe
 
@@ -28,12 +29,18 @@ class MyDataset(Dataset):
     def __len__(self):
         return len(self.data)
     
+    
+    
 def coeff_determination(y_true, y_pred):
-    SS_res = torch.sum(torch.square( y_true - y_pred ))
-    SS_tot = torch.sum(torch.square( y_true - torch.mean(y_true) ) )
-    return ( 1 - SS_res/(SS_tot + sys_epsilon) )
+    
+    SS_res = torch.sum(torch.square(y_true - y_pred))
+    SS_tot = torch.var(y_true, unbiased=False) * y_true.size(0)
+    return 1 - SS_res / (SS_tot + sys_epsilon)
+
+
 
 class MLPModel(nn.Module):
+   
     def __init__(self, input_size, output_size, hidden_layers, neurons_per_layer):
         super(MLPModel, self).__init__()
 
@@ -53,7 +60,10 @@ class MLPModel(nn.Module):
         x = self.block(x)
         return x
     
+    
+    
 class EarlyStopper:
+    
     def __init__(self, patience=1, path=None):
         self.patience = patience
         self.path = path
@@ -71,6 +81,8 @@ class EarlyStopper:
                 print('+++ Early Stopping is reached! +++')
                 return True
         return False
+    
+    
     
 def log_epoch_info(epoch, epochs, Loss_train, coeff_train, Loss_val, coeff_val):
     message = (
